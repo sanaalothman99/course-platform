@@ -54,7 +54,7 @@ const fetchCourses = async () => {
                 key={course.id}
                 className="bg-[#111827] border border-white/10 rounded-3xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-2 hover:shadow-xl transition-all duration-300"
               >
-                <div className="relative h-48 bg-gradient-to-br from-blue-600 to-blue-800">
+                 <div className="h-64 bg-[#0a0f1e] flex items-center justify-center overflow-hidden">
                   {course.thumbnail ? (
                     <img
                       src={course.thumbnail}
