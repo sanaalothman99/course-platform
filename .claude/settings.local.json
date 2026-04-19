@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la c:/course-platform/.env*)",
+      "Bash(ls -la c:/course-platform-api/.env*)"
+    ]
+  }
+}
