@@ -22,8 +22,8 @@ export default function Admin() {
     const token = localStorage.getItem("token")
     try {
       const [coursesRes, ordersRes] = await Promise.all([
-        fetch("process.env.NEXT_PUBLIC_API_URL/courses"),
-        fetch("process.env.NEXT_PUBLIC_API_URL/orders/all", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/all`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])
@@ -40,7 +40,7 @@ export default function Admin() {
   const deleteCourse = async (id: string) => {
     if (!confirm("Delete this course?")) return
     const token = localStorage.getItem("token")
-    await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })

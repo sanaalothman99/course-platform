@@ -24,7 +24,7 @@ export default function Courses() {
 
 const fetchCourses = async () => {
   try {
-    const res = await fetch("process.env.NEXT_PUBLIC_API_URL/courses")
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`)
     const data = await res.json()
     const mainCourses = Array.isArray(data) ? data.filter((c: any) => !c.parentId) : []
     setCourses(mainCourses)

@@ -34,7 +34,7 @@ export default function NewCourse() {
       if (form.image) {
         const formData = new FormData()
         formData.append("file", form.image)
-        const uploadRes = await fetch('process.env.NEXT_PUBLIC_API_URL/upload/image/course-images', {
+        const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/course-images`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
@@ -43,7 +43,7 @@ export default function NewCourse() {
         imageUrl = uploadData.url
       }
 
-      const res = await fetch("process.env.NEXT_PUBLIC_API_URL/courses", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

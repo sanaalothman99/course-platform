@@ -40,7 +40,7 @@ function SubCourses({ courseId }: { courseId: string }) {
   const [subCourses, setSubCourses] = useState<any[]>([])
 
   useEffect(() => {
-    fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/sub-courses`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/sub-courses`)
       .then(res => res.json())
       .then(data => setSubCourses(Array.isArray(data) ? data : []))
   }, [courseId])
@@ -104,7 +104,7 @@ export default function CoursePage() {
 
   const fetchCourse = async () => {
     try {
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}`)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`)
       const data = await res.json()
       setCourse(data)
       // افتح كل الـ chapters تلقائياً
@@ -119,7 +119,7 @@ export default function CoursePage() {
   const token = localStorage.getItem("token")
   if (!token) return
   try {
-    const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/progress`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/progress`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
@@ -146,7 +146,7 @@ export default function CoursePage() {
 
   if (!token) return
 
-  const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/orders/check/${courseId}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/check/${courseId}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   const data = await res.json()
@@ -160,7 +160,7 @@ export default function CoursePage() {
     }
     setEnrolling(true)
     try {
-      const res = await fetch("process.env.NEXT_PUBLIC_API_URL/orders/checkout", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,7 +179,7 @@ export default function CoursePage() {
     const token = localStorage.getItem("token")
     if (!token || !lessonId) return
     try {
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/comments/lesson/${lessonId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments/lesson/${lessonId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -194,7 +194,7 @@ export default function CoursePage() {
     if (!token || !newComment || !activeLesson) return
     setSubmitting(true)
     try {
-      await fetch(`process.env.NEXT_PUBLIC_API_URL/comments/lesson/${activeLesson.id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments/lesson/${activeLesson.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -216,7 +216,7 @@ const toggleCompleted = async (lessonId: string) => {
   if (updated.has(lessonId)) {
     updated.delete(lessonId)
     if (token) {
-      await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/progress/${lessonId}/complete`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -224,7 +224,7 @@ const toggleCompleted = async (lessonId: string) => {
   } else {
     updated.add(lessonId)
     if (token) {
-      await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/progress/${lessonId}/complete`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       })

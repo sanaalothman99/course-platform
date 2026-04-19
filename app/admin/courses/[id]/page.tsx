@@ -41,7 +41,7 @@ function UserSearch({ onGrant }: { onGrant: (userId: string) => void }) {
     setLoading(true)
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch("process.env.NEXT_PUBLIC_API_URL/users", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -159,7 +159,7 @@ export default function ManageCourse() {
 
   const fetchCourse = async () => {
     const token = localStorage.getItem("token")
-    const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
@@ -170,7 +170,7 @@ export default function ManageCourse() {
     setNewChapter(prev => ({ ...prev, position: (data.chapters?.length || 0) + 1 }))
 
     if (data.hasLevels) {
-      const subRes = await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/sub-courses`)
+      const subRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/sub-courses`)
       const subData = await subRes.json()
       setSubCourses(Array.isArray(subData) ? subData : [])
     }
@@ -182,14 +182,14 @@ export default function ManageCourse() {
       const token = localStorage.getItem("token")
       const formData = new FormData()
       formData.append("file", file)
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/upload/video/${courseId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/video/${courseId}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       })
       const data = await res.json()
       if (data.url) {
-        await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/preview`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/preview`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -210,7 +210,7 @@ export default function ManageCourse() {
     setLoading(true)
     try {
       const token = localStorage.getItem("token")
-      await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/chapters`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/chapters`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -228,7 +228,7 @@ export default function ManageCourse() {
   const deleteChapter = async (chapterId: string) => {
     if (!confirm("Delete this chapter and all its lessons?")) return
     const token = localStorage.getItem("token")
-    await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/chapters/${chapterId}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/chapters/${chapterId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -240,7 +240,7 @@ export default function ManageCourse() {
     setLoading(true)
     try {
       const token = localStorage.getItem("token")
-      await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/chapters/${chapterId}/lessons`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/chapters/${chapterId}/lessons`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -260,7 +260,7 @@ export default function ManageCourse() {
     setLoading(true)
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/${courseId}/lessons`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -279,7 +279,7 @@ export default function ManageCourse() {
 
   const updateLesson = async (lessonId: string) => {
     const token = localStorage.getItem("token")
-    await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/lessons/${lessonId}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -294,7 +294,7 @@ export default function ManageCourse() {
   const deleteLesson = async (lessonId: string) => {
     if (!confirm("Delete this lesson?")) return
     const token = localStorage.getItem("token")
-    await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/lessons/${lessonId}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -307,14 +307,14 @@ export default function ManageCourse() {
       const token = localStorage.getItem("token")
       const formData = new FormData()
       formData.append("file", file)
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/upload/video/${courseId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/video/${courseId}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       })
       const data = await res.json()
       if (data.url) {
-        await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/lessons/${lessonId}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -335,14 +335,14 @@ export default function ManageCourse() {
       const token = localStorage.getItem("token")
       const formData = new FormData()
       formData.append("file", file)
-      const res = await fetch(`process.env.NEXT_PUBLIC_API_URL/upload/pdf/${courseId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/pdf/${courseId}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       })
       const data = await res.json()
       if (data.url) {
-        await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/lessons/${lessonId}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -363,7 +363,7 @@ export default function ManageCourse() {
   setGrantLoading(true)
   try {
     const token = localStorage.getItem("token")
-    const res = await fetch("process.env.NEXT_PUBLIC_API_URL/orders/grant-access", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/grant-access`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -388,7 +388,7 @@ export default function ManageCourse() {
       if (subCourseForm.image) {
         const formData = new FormData()
         formData.append("file", subCourseForm.image)
-        const uploadRes = await fetch(`process.env.NEXT_PUBLIC_API_URL/upload/image/${courseId}`, {
+        const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
@@ -397,7 +397,7 @@ export default function ManageCourse() {
         imageUrl = uploadData.url
       }
 
-      await fetch("process.env.NEXT_PUBLIC_API_URL/courses", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -642,7 +642,7 @@ export default function ManageCourse() {
                               <button
                                 onClick={async () => {
                                   const token = localStorage.getItem("token")
-                                  await fetch(`process.env.NEXT_PUBLIC_API_URL/courses/chapters/${chapter.id}`, {
+                                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/chapters/${chapter.id}`, {
                                     method: "PUT",
                                     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token }`},
                                     body: JSON.stringify({ title: editChapterTitle }),

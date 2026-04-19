@@ -30,7 +30,7 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch("process.env.NEXT_PUBLIC_API_URL/orders/all", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/all`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()

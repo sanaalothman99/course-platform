@@ -36,7 +36,7 @@ export default function Home() {
   const [currentImg, setCurrentImg] = useState(0)
 
   useEffect(() => {
-    fetch("process.env.NEXT_PUBLIC_API_URL/courses")
+   fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`)
       .then(res => res.json())
       .then(data => {
         const mainCourses = Array.isArray(data) ? data.filter((c: any) => !c.parentId) : []
