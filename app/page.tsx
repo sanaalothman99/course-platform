@@ -174,7 +174,7 @@ export default function Home() {
                   <p className="text-gray-400 text-sm leading-6 mb-6 line-clamp-2">{course.description}</p>
 
                   <div className="text-sm text-gray-500 mb-6">
-                    📖 {`course.hasLevels ? ${course.children?.length || 0} Levels : ${course.lessons?.length || 0} Lessons`}
+                    📖 {course.hasLevels ? `${course.children?.length || 0} Levels` : `${course.lessons?.length || 0} Lessons`}
                   </div>
 
                   <div className="flex items-center justify-between">
