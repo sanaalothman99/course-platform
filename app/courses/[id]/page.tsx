@@ -94,6 +94,7 @@ export default function CoursePage() {
   const [newComment, setNewComment] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!courseId) return
@@ -107,7 +108,6 @@ export default function CoursePage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`)
       const data = await res.json()
       setCourse(data)
-      // افتح كل الـ chapters تلقائياً
       if (data.chapters) {
         setExpandedChapters(new Set(data.chapters.map((c: Chapter) => c.id)))
       }
@@ -115,43 +115,41 @@ export default function CoursePage() {
       setLoading(false)
     }
   }
+
   const fetchProgress = async () => {
-  const token = localStorage.getItem("token")
-  if (!token) return
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/progress`, {
+    const token = localStorage.getItem("token")
+    if (!token) return
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/progress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setCompleted(new Set(data.map((p: any) => p.lessonId)))
+      }
+    } catch {
+      setCompleted(new Set())
+    }
+  }
+
+  const checkEnrollment = async () => {
+    const token = localStorage.getItem("token")
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      const user = JSON.parse(userData)
+      if (user.role === "ADMIN") {
+        setEnrolled(true)
+        return
+      }
+    }
+    if (!token) return
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/check/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
-    if (Array.isArray(data)) {
-      setCompleted(new Set(data.map((p: any) => p.lessonId)))
-    }
-  } catch {
-    setCompleted(new Set())
-  }
-}
-
-  const checkEnrollment = async () => {
-  const token = localStorage.getItem("token")
-  
-  // تحقق إذا أدمن
-  const userData = localStorage.getItem("user")
-  if (userData) {
-    const user = JSON.parse(userData)
-    if (user.role === "ADMIN") {
-      setEnrolled(true)
-      return
-    }
+    setEnrolled(data.enrolled)
   }
 
-  if (!token) return
-
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/check/${courseId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  const data = await res.json()
-  setEnrolled(data.enrolled)
-}
   const handleEnroll = async () => {
     const token = localStorage.getItem("token")
     if (!token) {
@@ -209,29 +207,28 @@ export default function CoursePage() {
     }
   }
 
-const toggleCompleted = async (lessonId: string) => {
-  const token = localStorage.getItem("token")
-  const updated = new Set(completed)
-  
-  if (updated.has(lessonId)) {
-    updated.delete(lessonId)
-    if (token) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+  const toggleCompleted = async (lessonId: string) => {
+    const token = localStorage.getItem("token")
+    const updated = new Set(completed)
+    if (updated.has(lessonId)) {
+      updated.delete(lessonId)
+      if (token) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
+    } else {
+      updated.add(lessonId)
+      if (token) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
     }
-  } else {
-    updated.add(lessonId)
-    if (token) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/progress/${lessonId}/complete`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-    }
+    setCompleted(updated)
   }
-  setCompleted(updated)
-}
 
   const toggleChapter = (chapterId: string) => {
     const updated = new Set(expandedChapters)
@@ -272,37 +269,61 @@ const toggleCompleted = async (lessonId: string) => {
       </main>
     )
   }
-    // كورس فيه مستويات — مشترك أو أدمن
-if (enrolled && course.hasLevels) {
-  return (
-    <main className="min-h-screen bg-[#0a0f1e] text-white">
-      <Navbar />
-      <section className="px-6 py-24">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-          <p className="text-gray-400 mb-16">{course.description}</p>
-          <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
-          <SubCourses courseId={course.id} />
-        </div>
-      </section>
-    </main>
-  )
-}
 
-// Landing page — not enrolled
-if (!enrolled) {
-  
+  // Coming Soon — عرض وصف بس
+  if (course.comingSoon) {
+    return (
+      <main className="min-h-screen bg-[#0a0f1e] text-white">
+        <Navbar />
+        <section className="max-w-3xl mx-auto px-6 py-24 text-center">
+          <div className="text-8xl mb-8">🔜</div>
+          <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-4 py-2 rounded-full">
+            Coming Soon
+          </span>
+          <h1 className="text-4xl font-bold mt-6 mb-4">{course.title}</h1>
+          <p className="text-gray-400 leading-8 mb-8">{course.description}</p>
+          <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-6">
+            <p className="text-yellow-400 font-semibold">🚧 This course is under development</p>
+            <p className="text-gray-400 text-sm mt-2">Stay tuned — we'll notify you when it's ready!</p>
+          </div>
+          <Link href="/courses" className="inline-block mt-8 bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-full font-semibold transition-colors">
+            ← Back to Courses
+          </Link>
+        </section>
+      </main>
+    )
+  }
+
+  // كورس فيه مستويات — مشترك أو أدمن
+  if (enrolled && course.hasLevels) {
+    return (
+      <main className="min-h-screen bg-[#0a0f1e] text-white">
+        <Navbar />
+        <section className="px-6 py-24">
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
+            <p className="text-gray-400 mb-16">{course.description}</p>
+            <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
+            <SubCourses courseId={course.id} />
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  // Landing page — not enrolled
+  if (!enrolled) {
     return (
       <main className="min-h-screen bg-[#0a0f1e] text-white">
         <Navbar />
 
-        <section className="relative py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <section className="relative py-12 md:py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div>
               <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">
                 {course.level}
               </span>
-              <h1 className="text-4xl font-bold mt-4 mb-4">{course.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
               <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
               <div className="flex gap-6 text-sm text-gray-400 mb-8">
                 {course.hasLevels ? (
@@ -311,16 +332,12 @@ if (!enrolled) {
                   <span>📖 {totalLessons} Lessons</span>
                 )}
               </div>
-              <div className="flex items-center gap-6">
-                {course.comingSoon ? (
-                  <span className="bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-6 py-3 rounded-full font-semibold">
-                    🔜 Coming Soon
-                  </span>
-                ) : course.hasLevels ? (
+              <div className="flex flex-wrap items-center gap-4">
+                {course.hasLevels ? (
                   <span className="text-gray-400 text-sm">Select a level below to enroll</span>
                 ) : (
                   <>
-                    <span className="text-4xl font-bold">${course.price}</span>
+                    <span className="text-3xl md:text-4xl font-bold">${course.price}</span>
                     <button
                       onClick={handleEnroll}
                       disabled={enrolling}
@@ -333,26 +350,24 @@ if (!enrolled) {
               </div>
             </div>
 
-            <div className="relative h-64 rounded-2xl overflow-hidden border border-white/10">
+            <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
               {course.thumbnail ? (
                 <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-8xl">🎓</div>
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-7xl">🎓</div>
               )}
             </div>
           </div>
         </section>
 
-        {/* Preview Video */}
         {course.previewUrl && (
           <section className="max-w-5xl mx-auto px-6 py-8">
             <h2 className="text-2xl font-bold mb-4">🎬 Preview Video</h2>
-            <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96 " />
+            <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96" />
           </section>
         )}
 
-        {/* Levels or Content */}
-        <section className="max-w-5xl mx-auto px-6 py-16">
+        <section className="max-w-5xl mx-auto px-6 py-12">
           {course.hasLevels ? (
             <div>
               <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
@@ -365,13 +380,13 @@ if (!enrolled) {
                 {course.chapters?.length > 0 ? (
                   course.chapters.map((chapter) => (
                     <div key={chapter.id} className="bg-[#111827] border border-white/10 rounded-xl overflow-hidden">
-                      <div className="px-6 py-4 flex items-center gap-3 bg-white/5">
+                      <div className="px-4 md:px-6 py-4 flex items-center gap-3 bg-white/5">
                         <span className="text-blue-400 font-bold text-sm">#{chapter.position}</span>
-                        <span className="font-semibold">{chapter.title}</span>
+                        <span className="font-semibold text-sm md:text-base">{chapter.title}</span>
                         <span className="ml-auto text-gray-400 text-xs">{chapter.lessons.length} lessons</span>
                       </div>
                       {chapter.lessons.map((lesson, i) => (
-                        <div key={lesson.id} className="px-6 py-3 flex items-center gap-4 border-t border-white/5">
+                        <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
                           <span className="text-gray-500 text-sm w-6">{i + 1}</span>
                           <span className="flex-1 text-sm text-gray-300">{lesson.title}</span>
                           <span className="text-gray-600 text-sm">🔒</span>
@@ -381,10 +396,10 @@ if (!enrolled) {
                   ))
                 ) : (
                   course.lessons.map((lesson, i) => (
-                    <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-6 py-4 flex items-center gap-4">
+                    <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-4 md:px-6 py-4 flex items-center gap-4">
                       <span className="text-blue-400 font-bold w-8">{i + 1}</span>
-                      <span className="flex-1">{lesson.title}</span>
-                      <span className="text-gray-600 text-sm">🔒 Locked</span>
+                      <span className="flex-1 text-sm">{lesson.title}</span>
+                      <span className="text-gray-600 text-sm">🔒</span>
                     </div>
                   ))
                 )}
@@ -406,32 +421,55 @@ if (!enrolled) {
     <main className="min-h-screen bg-[#0a0f1e] text-white">
       <Navbar />
 
-      <div className="flex" style={{ height: "calc(100vh - 80px)" }}>
+      {/* Mobile Sidebar Toggle */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+        >
+          {sidebarOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
+      <div className="flex relative" style={{ height: "calc(100vh - 80px)" }}>
 
         {/* Sidebar */}
-        <div className="w-80 bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden flex-shrink-0">
-          <div className="bg-blue-700 p-6">
+        <div className={`
+          fixed md:relative top-0 left-0 h-full z-40
+          w-80 bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden
+          transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `} style={{ marginTop: "80px" }}>
+          
+          {/* Close button mobile */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden absolute top-4 right-4 text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+
+          <div className="bg-blue-700 p-4 md:p-6">
             <Link href="/courses" className="text-white/70 text-sm hover:text-white mb-3 inline-block">
               ← Back to Courses
             </Link>
-            <h2 className="text-lg font-bold">{course.title}</h2>
+            <h2 className="text-base md:text-lg font-bold">{course.title}</h2>
             <div className="mt-3">
               <div className="flex justify-between text-sm text-white/70 mb-1">
                 <span>Progress</span>
                 <span>{progress}%</span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-2">
-                <div className="bg-white h-2 rounded-full transition-all" style={{ width: `${progress}%`}} />
+                <div className="bg-white h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
               </div>
               <p className="text-white/70 text-xs mt-1">{completedCount} / {totalLessons} lessons</p>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {/* Preview */}
             {course.previewUrl && (
               <div
-                onClick={() => { setActiveLesson(null); setActiveTab("preview") }}
+                onClick={() => { setActiveLesson(null); setActiveTab("preview"); setSidebarOpen(false) }}
                 className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 transition-colors ${activeTab === "preview" && !activeLesson ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
               >
                 <span className="text-yellow-400">🎬</span>
@@ -442,13 +480,12 @@ if (!enrolled) {
               </div>
             )}
 
-            {/* Chapters */}
             {course.chapters?.length > 0 ? (
               course.chapters.map((chapter) => (
                 <div key={chapter.id}>
                   <div
                     onClick={() => toggleChapter(chapter.id)}
-                    className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 bg-white/3 hover:bg-white/5 transition-colors"
+                    className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 hover:bg-white/5 transition-colors"
                   >
                     <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶"}</span>
                     <div className="flex-1">
@@ -462,7 +499,7 @@ if (!enrolled) {
                     .map((lesson) => (
                       <div
                         key={lesson.id}
-                        onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id) }}
+                        onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
                         className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-8 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
                       >
                         <button
@@ -480,7 +517,7 @@ if (!enrolled) {
               course.lessons.sort((a, b) => a.position - b.position).map((lesson) => (
                 <div
                   key={lesson.id}
-                  onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id) }}
+                  onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
                   className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
                 >
                   <button
@@ -496,19 +533,26 @@ if (!enrolled) {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden fixed inset-0 bg-black/50 z-30"
+            style={{ marginTop: "80px" }}
+          />
+        )}
 
-          {/* Preview Video */}
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {activeTab === "preview" && !activeLesson && (
             <div>
-              <h1 className="text-2xl font-bold mb-6">🎬 Preview — {course.title}</h1>
+              <h1 className="text-xl md:text-2xl font-bold mb-6">🎬 Preview — {course.title}</h1>
               {course.previewUrl ? (
-                <video src={course.previewUrl} controls controlsList="nodownload" className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
+                <video src={course.previewUrl} controls className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
               ) : (
                 <div className="aspect-video w-full max-w-4xl rounded-2xl bg-[#111827] border border-white/10 flex items-center justify-center mb-6">
                   <div className="text-center text-gray-400">
-                    <p className="text-6xl mb-4">🎬</p>
+                    <p className="text-5xl mb-4">🎬</p>
                     <p>Select a lesson to start</p>
                   </div>
                 </div>
@@ -516,11 +560,10 @@ if (!enrolled) {
             </div>
           )}
 
-          {/* Lesson */}
           {activeLesson && (
             <div>
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">{activeLesson.title}</h1>
+              <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+                <h1 className="text-xl md:text-2xl font-bold">{activeLesson.title}</h1>
                 <button
                   onClick={() => toggleCompleted(activeLesson.id)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${completed.has(activeLesson.id) ? "bg-green-600 hover:bg-green-500" : "bg-white/10 hover:bg-white/20"}`}
@@ -529,21 +572,19 @@ if (!enrolled) {
                 </button>
               </div>
 
-              {/* Video */}
-              <div className="aspect-video w-full max-w-full rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
+              <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
                 {activeLesson.videoUrl ? (
-                  <video src={activeLesson.videoUrl} controls controlsList="nodownload" className="w-full h-full" />
+                  <video src={activeLesson.videoUrl} controls className="w-full h-full" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <div className="text-center">
-                      <p className="text-6xl mb-4">🎬</p>
+                      <p className="text-5xl mb-4">🎬</p>
                       <p>Video coming soon</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Description */}
               {activeLesson.description && (
                 <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
                   <h3 className="font-bold mb-2">📝 About this lesson</h3>
@@ -551,63 +592,34 @@ if (!enrolled) {
                 </div>
               )}
 
-              {/* PDF */}
-              {activeLesson.pdfUrl && (
-                <div className="max-w-4xl mb-8">
-                  <h3 className="font-bold mb-4">📎 Attachments</h3>
-                  <a
-                    href={activeLesson.pdfUrl}
-                    target="_blank"
-                    className="bg-[#111827] border border-white/10 rounded-xl px-5 py-4 flex items-center gap-4 hover:border-blue-500/50 transition-all"
-                  >
-                    <span className="text-red-400 text-2xl">📄</span>
-                    <span className="text-sm font-medium">Download PDF</span>
-                    <span className="ml-auto text-blue-400 text-sm">Download →</span>
-                  </a>
-                </div>
-              )}
-
               {/* Comments */}
               <div className="max-w-4xl">
-                <h2 className="text-2xl font-bold mb-6">💬 Comments</h2>
-                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
-                  <textarea
-                    rows={3}
-                    placeholder="Ask a question or leave a comment..."
+                <h3 className="font-bold text-lg mb-4">💬 Comments</h3>
+                <div className="flex gap-3 mb-6">
+                  <input
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none mb-4"
+                    placeholder="Write a comment..."
+                    className="flex-1 bg-[#111827] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
                   />
                   <button
                     onClick={submitComment}
-                    disabled={!newComment || submitting}
-                    className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-6 py-2 rounded-xl text-sm font-semibold transition-colors"
+                    disabled={submitting}
+                    className="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-xl text-sm font-semibold disabled:opacity-50"
                   >
-                    {submitting ? "Sending..." : "Post Comment →"}
+                    Send
                   </button>
                 </div>
-
                 <div className="flex flex-col gap-4">
-                  {comments.length === 0 && (
-                    <p className="text-gray-400 text-sm">No comments yet — be the first!</p>
-                  )}
-                  {comments.map((comment: any) => (
-                    <div key={comment.id} className="bg-[#111827] border border-white/10 rounded-2xl p-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-blue-400">{comment.user.name}</span>
-                        <span className="text-gray-500 text-xs">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="bg-[#111827] border border-white/10 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
+                          {comment.user?.name?.charAt(0).toUpperCase()}
+                        </span>
+                        <span className="text-sm font-semibold">{comment.user?.name}</span>
                       </div>
-                      <p className="text-gray-300 mb-4">{comment.content}</p>
-                      {comment.replies?.length > 0 && (
-                        <div className="border-l-2 border-blue-500/30 pl-4 flex flex-col gap-2">
-                          {comment.replies.map((reply: any) => (
-                            <div key={reply.id} className="bg-[#0a0f1e] rounded-xl p-3">
-                              <span className="text-green-400 text-sm font-semibold">✅ {reply.user.name} (Admin)</span>
-                              <p className="text-gray-300 text-sm mt-1">{reply.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <p className="text-gray-300 text-sm">{comment.content}</p>
                     </div>
                   ))}
                 </div>
