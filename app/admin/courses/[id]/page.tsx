@@ -502,24 +502,25 @@ export default function ManageCourse() {
   <div className="flex flex-wrap items-center justify-between gap-4">
     <h1 className="text-3xl font-bold">{course?.title || "Loading..."}</h1>
     {/* Toggle Coming Soon */}
-    <button
-      onClick={async () => {
-        const token = localStorage.getItem("token")
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ comingSoon: !course?.comingSoon }),
-        })
-        fetchCourse()
-      }}
-      className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-        course?.comingSoon
-          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/30"
-          : "bg-green-500/20 text-green-400 border border-green-400/30 hover:bg-green-500/30"
-      }`}
-    >
-      {course?.comingSoon ? "🔜 Coming Soon — Click to Activate" : "✅ Active — Click to set Coming Soon"}
-    </button>
+   <button
+  onClick={async () => {
+    if (!course) return
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ comingSoon: !course.comingSoon }),
+    })
+    fetchCourse()
+  }}
+  className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+    course?.comingSoon
+      ? "bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/30"
+      : "bg-green-500/20 text-green-400 border border-green-400/30 hover:bg-green-500/30"
+  }`}
+>
+  {course?.comingSoon ? "🔜 Coming Soon — Click to Activate" : "✅ Active — Click to set Coming Soon"}
+</button>
   </div>
 </div>
 
