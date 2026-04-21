@@ -514,7 +514,7 @@ export default function ManageCourse() {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ comingSoon: newValue }),
     })
-    fetchCourse()
+      
   }}
   className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
     isComingSoon
