@@ -270,29 +270,48 @@ export default function CoursePage() {
     )
   }
 
-  // Coming Soon — عرض وصف بس
-  if (course.comingSoon) {
-    return (
-      <main className="min-h-screen bg-[#0a0f1e] text-white">
-        <Navbar />
-        <section className="max-w-3xl mx-auto px-6 py-24 text-center">
-          <div className="text-8xl mb-8">🔜</div>
-          <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-4 py-2 rounded-full">
-            Coming Soon
-          </span>
-          <h1 className="text-4xl font-bold mt-6 mb-4">{course.title}</h1>
-          <p className="text-gray-400 leading-8 mb-8">{course.description}</p>
-          <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-6">
-            <p className="text-yellow-400 font-semibold">🚧 This course is under development</p>
-            <p className="text-gray-400 text-sm mt-2">Stay tuned — we'll notify you when it's ready!</p>
+ // Coming Soon — عرض وصف + مستويات فرعية
+if (course.comingSoon) {
+  return (
+    <main className="min-h-screen bg-[#0a0f1e] text-white">
+      <Navbar />
+      <section className="relative py-12 md:py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 rounded-full">
+              🔜 Coming Soon
+            </span>
+            <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
+            <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
+            <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-4">
+              <p className="text-yellow-400 font-semibold text-sm">🚧 This course is under development</p>
+              <p className="text-gray-400 text-xs mt-1">Stay tuned — we'll notify you when it's ready!</p>
+            </div>
           </div>
-          <Link href="/courses" className="inline-block mt-8 bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-full font-semibold transition-colors">
-            ← Back to Courses
-          </Link>
+          <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
+            {course.thumbnail ? (
+              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-yellow-600/30 to-blue-800 flex items-center justify-center text-7xl">🔜</div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* المستويات الفرعية إذا في */}
+      {course.hasLevels && (
+        <section className="max-w-5xl mx-auto px-6 py-12">
+          <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
+          <SubCourses courseId={course.id} />
         </section>
-      </main>
-    )
-  }
+      )}
+
+      <Link href="/courses" className="block text-center text-gray-400 hover:text-white text-sm py-8 transition-colors">
+        ← Back to Courses
+      </Link>
+    </main>
+  )
+}
 
   // كورس فيه مستويات — مشترك أو أدمن
   if (enrolled && course.hasLevels) {
