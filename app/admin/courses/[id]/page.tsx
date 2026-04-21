@@ -494,13 +494,103 @@ export default function ManageCourse() {
 
       <div className="max-w-4xl mx-auto px-8 py-12">
 
-        {/* Header */}
-        <div className="mb-8">
-          <button onClick={() => router.push("/admin")} className="text-gray-400 hover:text-white text-sm mb-2 block">
-            ← Back to Admin
-          </button>
-          <h1 className="text-3xl font-bold">{course?.title || "Loading..."}</h1>
-        </div>
+       {/* Header */}
+<div className="mb-8">
+  <button onClick={() => router.push("/admin")} className="text-gray-400 hover:text-white text-sm mb-2 block">
+    ← Back to Admin
+  </button>
+  <div className="flex flex-wrap items-center justify-between gap-4">
+    <h1 className="text-3xl font-bold">{course?.title || "Loading..."}</h1>
+    {/* Toggle Coming Soon */}
+    <button
+      onClick={async () => {
+        const token = localStorage.getItem("token")
+        await fetch(${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: Bearer ${token} },
+          body: JSON.stringify({ comingSoon: !course?.comingSoon }),
+        })
+        fetchCourse()
+      }}
+      className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+        course?.comingSoon
+          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/30"
+          : "bg-green-500/20 text-green-400 border border-green-400/30 hover:bg-green-500/30"
+      }`}
+    >
+      {course?.comingSoon ? "🔜 Coming Soon — Click to Activate" : "✅ Active — Click to set Coming Soon"}
+    </button>
+  </div>
+</div>
+
+{/* Edit Course Info */}
+<div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-8">
+  <h2 className="text-xl font-bold mb-4">✏️ Edit Course Info</h2>
+  <div className="flex flex-col gap-4">
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">Title</label>
+      <input
+        type="text"
+        defaultValue={course?.title}
+        id="edit-title"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+      />
+    </div>
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">Description</label>
+      <textarea
+        rows={4}
+        defaultValue={course?.description}
+        id="edit-description"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 resize-none"
+      />
+    </div>
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">Course Image</label>
+      {course?.thumbnail && (
+        <img src={course.thumbnail} alt="thumbnail" className="w-full h-40 object-contain rounded-xl mb-3 bg-[#0a0f1e]" />
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        id="edit-image"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+      />
+    </div>
+    <button
+      onClick={async () => {
+        const token = localStorage.getItem("token")
+        const title = (document.getElementById("edit-title") as HTMLInputElement)?.value
+        const description = (document.getElementById("edit-description") as HTMLTextAreaElement)?.value
+        const imageFile = (document.getElementById("edit-image") as HTMLInputElement)?.files?.[0]
+
+        let thumbnail = course?.thumbnail
+        if (imageFile) {
+          const formData = new FormData()
+          formData.append("file", imageFile)
+          const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          })
+          const uploadData = await uploadRes.json()
+          thumbnail = uploadData.url
+        }
+
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ title, description, thumbnail }),
+        })
+        fetchCourse()
+        alert("Course updated!")
+      }}
+      className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-semibold transition-colors"
+    >
+      💾 Save Changes
+    </button>
+  </div>
+</div>
 
         {/* Preview Video */}
         <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-8">

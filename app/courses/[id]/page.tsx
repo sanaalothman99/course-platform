@@ -290,7 +290,7 @@ if (course.comingSoon) {
           </div>
           <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
             {course.thumbnail ? (
-              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-yellow-600/30 to-blue-800 flex items-center justify-center text-7xl">🔜</div>
             )}
