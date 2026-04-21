@@ -505,9 +505,9 @@ export default function ManageCourse() {
     <button
       onClick={async () => {
         const token = localStorage.getItem("token")
-        await fetch(${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: Bearer ${token} },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ comingSoon: !course?.comingSoon }),
         })
         fetchCourse()
