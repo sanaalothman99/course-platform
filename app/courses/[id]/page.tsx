@@ -28,6 +28,7 @@ type Course = {
   price: number
   level: string
   thumbnail?: string
+  bannerImage?: string
   previewUrl?: string
   comingSoon: boolean
   hasLevels: boolean
@@ -372,9 +373,9 @@ if (course.comingSoon) {
          <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
   {(course as any).bannerImage || course.thumbnail ? (
     <img 
-      src={(course as any).bannerImage || course.thumbnail} 
+      src={course.bannerImage || course.thumbnail} 
       alt={course.title} 
-      className="w-full h-full object-cover" 
+      className="w-full h-full object-contain" 
     />
   ) : (
     <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-7xl">🎓</div>
