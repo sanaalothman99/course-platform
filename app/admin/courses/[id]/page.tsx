@@ -526,7 +526,6 @@ export default function ManageCourse() {
 </button>
   </div>
 </div>
-
 {/* Edit Course Info */}
 <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-8">
   <h2 className="text-xl font-bold mb-4">✏️ Edit Course Info</h2>
@@ -550,7 +549,7 @@ export default function ManageCourse() {
       />
     </div>
     <div>
-      <label className="text-sm text-gray-400 mb-2 block">Course Image</label>
+      <label className="text-sm text-gray-400 mb-2 block">Course Thumbnail (shown in courses list)</label>
       {course?.thumbnail && (
         <img src={course.thumbnail} alt="thumbnail" className="w-full h-40 object-contain rounded-xl mb-3 bg-[#0a0f1e]" />
       )}
@@ -561,14 +560,29 @@ export default function ManageCourse() {
         className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
       />
     </div>
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">Banner Image (shown inside course page)</label>
+      {course?.bannerImage && (
+        <img src={course.bannerImage} alt="banner" className="w-full h-40 object-contain rounded-xl mb-3 bg-[#0a0f1e]" />
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        id="edit-banner"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+      />
+    </div>
     <button
       onClick={async () => {
         const token = localStorage.getItem("token")
         const title = (document.getElementById("edit-title") as HTMLInputElement)?.value
         const description = (document.getElementById("edit-description") as HTMLTextAreaElement)?.value
         const imageFile = (document.getElementById("edit-image") as HTMLInputElement)?.files?.[0]
+        const bannerFile = (document.getElementById("edit-banner") as HTMLInputElement)?.files?.[0]
 
         let thumbnail = course?.thumbnail
+        let bannerImage = course?.bannerImage
+
         if (imageFile) {
           const formData = new FormData()
           formData.append("file", imageFile)
@@ -581,10 +595,22 @@ export default function ManageCourse() {
           thumbnail = uploadData.url
         }
 
+        if (bannerFile) {
+          const formData = new FormData()
+          formData.append("file", bannerFile)
+          const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          })
+          const uploadData = await uploadRes.json()
+          bannerImage = uploadData.url
+        }
+
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ title, description, thumbnail }),
+          body: JSON.stringify({ title, description, thumbnail, bannerImage }),
         })
         fetchCourse()
         alert("Course updated!")

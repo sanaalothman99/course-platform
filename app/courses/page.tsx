@@ -54,17 +54,17 @@ const fetchCourses = async () => {
                 key={course.id}
                 className="bg-[#111827] border border-white/10 rounded-3xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-2 hover:shadow-xl transition-all duration-300"
               >
-                 <div className="h-64 bg-[#0a0f1e] flex items-center justify-center overflow-hidden">
-                  {course.thumbnail ? (
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      className="w-full h-full object-contain p-4"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-6xl">🎓</div>
-                  )}
-                </div>
+                <div className="aspect-square bg-[#0a0f1e] overflow-hidden">
+  {course.thumbnail ? (
+    <img
+      src={course.thumbnail}
+      alt={course.title}
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full flex items-center justify-center text-6xl">🎓</div>
+  )}
+</div>
 
                 <div className="p-6">
                   <div className="flex gap-2 mb-3">
