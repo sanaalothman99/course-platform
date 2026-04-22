@@ -59,7 +59,7 @@ const fetchCourses = async () => {
     <img
       src={course.thumbnail}
       alt={course.title}
-      className="w-full h-full object-cover"
+      className="w-full h-full object-contain"
     />
   ) : (
     <div className="w-full h-full flex items-center justify-center text-6xl">🎓</div>

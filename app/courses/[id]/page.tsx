@@ -375,7 +375,7 @@ if (course.comingSoon) {
     <img 
       src={(course as any).bannerImage ?? course.thumbnail ?? ''} 
       alt={course.title} 
-      className="w-full h-full object-contain" 
+      className="w-full h-full object-contain p-4" 
     />
   ) : (
     <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-7xl">🎓</div>
