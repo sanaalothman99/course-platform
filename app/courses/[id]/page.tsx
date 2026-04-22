@@ -373,7 +373,7 @@ if (course.comingSoon) {
          <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
   {(course as any).bannerImage || course.thumbnail ? (
     <img 
-      src={course.bannerImage || course.thumbnail} 
+      src={(course as any).bannerImage || course.thumbnail} 
       alt={course.title} 
       className="w-full h-full object-contain" 
     />
