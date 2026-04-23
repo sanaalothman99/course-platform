@@ -58,7 +58,7 @@ function SubCourses({ courseId }: { courseId: string }) {
         >
           <div className="h-40 bg-gradient-to-br from-blue-600 to-blue-800">
             {sub.thumbnail ? (
-              <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain bg-[#0a0f1e]" />
+              <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain p-4  bg-[#0a0f1e]" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-5xl">🎓</div>
             )}
