@@ -314,22 +314,37 @@ if (course.comingSoon) {
 }
 
   // كورس فيه مستويات — مشترك أو أدمن
-  if (enrolled && course.hasLevels) {
-    return (
-      <main className="min-h-screen bg-[#0a0f1e] text-white">
-        <Navbar />
-        <section className="px-6 py-24">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-            <p className="text-gray-400 mb-16">{course.description}</p>
-            <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
-            <SubCourses courseId={course.id} />
+  
+if (enrolled && course.hasLevels) {
+  return (
+    <main className="min-h-screen bg-[#0a0f1e] text-white">
+      <Navbar />
+      <section className="px-6 py-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
+            <div>
+              <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
+              <p className="text-gray-400 mb-6">{course.description}</p>
+            </div>
+            {course.thumbnail && (
+              <div className="h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
+                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+              </div>
+            )}
           </div>
-        </section>
-      </main>
-    )
-  }
-
+          {course.previewUrl && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold mb-4">🎬 Preview Video</h2>
+              <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96" />
+            </div>
+          )}
+          <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
+          <SubCourses courseId={course.id} />
+        </div>
+      </section>
+    </main>
+  )
+}
   // Landing page — not enrolled
   if (!enrolled) {
     return (
