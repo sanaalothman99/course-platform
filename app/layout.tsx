@@ -13,9 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "A to Z Automation",
-  description: "Professional PLC Training Online Courses",
-};
+  title: "A to Z Automation | Online PLC Training",
+  description: "Learn PLC programming from scratch with hands-on online courses. TIA Portal, Step 7, HMI, Factory I/O and more. Professional industrial automation training.",
+  keywords: "PLC, automation, TIA Portal, SIMATIC, HMI, online courses, industrial automation",
+  openGraph: {
+    title: "A to Z Automation | Online PLC Training",
+    description: "Learn PLC programming from scratch with hands-on online courses.",
+    url: "https://atozautomation.de",
+    siteName: "A to Z Automation",
+  },
+}
 
 export default function RootLayout({
   children,
