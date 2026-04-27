@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [certificates, setCertificates] = useState<any[]>([])
 
   useEffect(() => {
     const userData = localStorage.getItem("user")
@@ -32,6 +33,7 @@ export default function Dashboard() {
     }
     setUser(JSON.parse(userData))
     fetchOrders()
+    fetchCertificates()
   }, [])
 
   const fetchOrders = async () => {
@@ -46,6 +48,18 @@ export default function Dashboard() {
       setLoading(false)
     }
   }
+  const fetchCertificates = async () => {
+  try {
+    const token = localStorage.getItem("token")
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/certificates`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    setCertificates(Array.isArray(data) ? data : [])
+  } catch {
+    setCertificates([])
+  }
+}
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -119,6 +133,28 @@ export default function Dashboard() {
               key={order.id}
               className="bg-[#111827] border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all"
             >
+              {/* My Certificates */}
+{certificates.length > 0 && (
+  <div className="mt-12">
+    <h2 className="text-2xl font-bold mb-6">🎓 My Certificates</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {certificates.map((cert) => (
+        <div key={cert.id} className="bg-[#111827] border border-green-500/30 rounded-2xl p-6">
+          <div className="text-4xl mb-4">📜</div>
+          <h3 className="font-bold mb-2">{cert.course.title}</h3>
+          <p className="text-gray-400 text-sm mb-4">{cert.course.level}</p>
+          <a
+            href={cert.certificateUrl}
+            target="_blank"
+            className="block text-center bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+          >
+            📥 Download Certificate
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
               {/* Image */}
               <div className="relative h-40 bg-gradient-to-br from-blue-600 to-blue-800">
                 {order.course.thumbnail ? (

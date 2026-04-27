@@ -10,36 +10,41 @@ export default function MemberLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleLogin = async () => {
-    setLoading(true)
-    setError("")
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
+const handleLogin = async () => {
+  setLoading(true)
+  setError("")
+  try {
+    // نولد deviceId من المتصفح
+    const deviceId = navigator.userAgent + screen.width + screen.height
 
-      const data = await res.json()
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...form, deviceId }),
+    })
 
-      if (res.ok) {
-        localStorage.setItem("token", data.token)
-        localStorage.setItem("user", JSON.stringify(data.user))
+    const data = await res.json()
 
-        if (data.user.role === "ADMIN") {
-          router.push("/admin")
-        } else {
-          router.push("/dashboard")
-        }
+    if (res.ok) {
+      localStorage.setItem("token", data.token)
+      localStorage.setItem("user", JSON.stringify(data.user))
+
+      if (data.user.role === "ADMIN") {
+        router.push("/admin")
       } else {
-        setError("Invalid email or password")
+        router.push("/dashboard")
       }
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
+    } else if (res.status === 403) {
+      setError("This account is already logged in on another device. Please contact support.")
+    } else {
+      setError("Invalid email or password")
     }
+  } catch {
+    setError("Something went wrong")
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <main className="min-h-screen bg-[#0a0f1e] text-white">

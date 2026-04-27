@@ -117,6 +117,97 @@ function UserSearch({ onGrant }: { onGrant: (userId: string) => void }) {
     </div>
   )
 }
+function CompletedStudents({ courseId }: { courseId: string }) {
+  const [students, setStudents] = useState<any[]>([])
+  const [uploading, setUploading] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchStudents()
+  }, [])
+
+  const fetchStudents = async () => {
+    const token = localStorage.getItem("token")
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/completed-students/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    setStudents(Array.isArray(data) ? data : [])
+  }
+
+  const uploadCertificate = async (orderId: string, userId: string, file: File) => {
+    setUploading(orderId)
+    try {
+      const token = localStorage.getItem("token")
+      const formData = new FormData()
+      formData.append("file", file)
+      const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/pdf/${courseId}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+      const uploadData = await uploadRes.json()
+      if (uploadData.url) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/certificate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ userId, courseId, certificateUrl: uploadData.url }),
+        })
+        fetchStudents()
+      }
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  return (
+    <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-8">
+      <h2 className="text-xl font-bold mb-4">🎓 Students Progress & Certificates</h2>
+      {students.length === 0 && <p className="text-gray-400 text-sm">No students enrolled yet</p>}
+      <div className="flex flex-col gap-3">
+        {students.map((s) => (
+          <div key={s.orderId} className="bg-[#0d1426] border border-white/5 rounded-xl p-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+                  {s.user.name[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{s.user.name}</p>
+                  <p className="text-gray-400 text-xs">{s.user.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className={`text-sm font-bold ${s.completed ? "text-green-400" : "text-yellow-400"}`}>
+                    {s.progress}% {s.completed ? "✅ Completed" : "⏳ In Progress"}
+                  </p>
+                </div>
+                {s.certificateUrl ? (
+                  <a href={s.certificateUrl} target="_blank" className="bg-green-600/20 text-green-400 border border-green-400/30 px-3 py-1 rounded-lg text-xs">
+                    📜 View Certificate
+                  </a>
+                ) : s.completed ? (
+                  <label className="cursor-pointer bg-blue-600/20 text-blue-400 border border-blue-400/30 px-3 py-1 rounded-lg text-xs hover:bg-blue-600/30 transition-colors">
+                    {uploading === s.orderId ? "Uploading..." : "📤 Upload Certificate"}
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0]
+                        if (f) uploadCertificate(s.orderId, s.user.id, f)
+                      }}
+                    />
+                  </label>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function ManageCourse() {
   const router = useRouter()
@@ -682,6 +773,7 @@ export default function ManageCourse() {
           </div>
         ) : (
           <div>
+            <CompletedStudents courseId={courseId} />
             {/* Chapters Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">

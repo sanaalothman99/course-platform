@@ -56,13 +56,13 @@ function SubCourses({ courseId }: { courseId: string }) {
           onClick={() => router.push(`/courses/${sub.id}`)}
           className="bg-[#111827] border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-500/50 hover:-translate-y-1 transition-all"
         >
-          <div className="h-40 bg-gradient-to-br from-blue-600 to-blue-800">
-            {sub.thumbnail ? (
-              <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain p-4  bg-[#0a0f1e]" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl">🎓</div>
-            )}
-          </div>
+       <div className="aspect-square bg-[#0a0f1e] overflow-hidden">
+  {sub.thumbnail ? (
+    <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain p-4" />
+  ) : (
+    <div className="w-full h-full flex items-center justify-center text-5xl">🎓</div>
+  )}
+</div>
           <div className="p-6">
             <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{sub.level}</span>
             <h3 className="font-bold text-lg mt-3 mb-2">{sub.title}</h3>

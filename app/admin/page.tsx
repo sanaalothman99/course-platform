@@ -3,6 +3,76 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import Navbar from "../components/Navbar"
+function ResetDevice() {
+  const [search, setSearch] = useState("")
+  const [users, setUsers] = useState<any[]>([])
+  const [success, setSuccess] = useState("")
+
+  const searchUsers = async (query: string) => {
+    setSearch(query)
+    if (!query) { setUsers([]); return }
+    const token = localStorage.getItem("token")
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    const filtered = (Array.isArray(data) ? data : []).filter((u: any) =>
+      u.name.toLowerCase().includes(query.toLowerCase()) ||
+      u.email.toLowerCase().includes(query.toLowerCase())
+    )
+    setUsers(filtered)
+  }
+
+  const resetDevice = async (userId: string) => {
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-device`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ userId }),
+    })
+    setSuccess("Device reset successfully!")
+    setUsers([])
+    setSearch("")
+    setTimeout(() => setSuccess(""), 3000)
+  }
+
+  return (
+    <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-12">
+      <h2 className="text-xl font-bold mb-4">📱 Reset Student Device</h2>
+      {success && (
+        <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl text-sm mb-4">
+          ✅ {success}
+        </div>
+      )}
+      <input
+        type="text"
+        placeholder="Search student by name or email..."
+        value={search}
+        onChange={(e) => searchUsers(e.target.value)}
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 mb-3"
+      />
+      {users.map((user) => (
+        <div key={user.id} className="bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+              {user.name[0]}
+            </div>
+            <div>
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-gray-400 text-xs">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => resetDevice(user.id)}
+            className="bg-red-600/20 text-red-400 border border-red-400/30 px-3 py-1 rounded-lg text-xs hover:bg-red-600/30 transition-colors"
+          >
+            Reset Device
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function Admin() {
   const router = useRouter()
@@ -113,6 +183,7 @@ export default function Admin() {
             </div>
           </Link>
         </div>
+        <ResetDevice />
 
     {/* Courses - Mobile Friendly */}
 <h2 className="text-2xl font-bold mb-6">Courses</h2>
