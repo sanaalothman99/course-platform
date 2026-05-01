@@ -4,6 +4,8 @@ import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "../../components/Navbar"
 
+
+
 type Lesson = {
   id: string
   title: string
@@ -335,7 +337,7 @@ if (enrolled && course.hasLevels) {
           {course.previewUrl && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-4">🎬 Preview Video</h2>
-              <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96" />
+              <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
             </div>
           )}
           <h2 className="text-2xl font-bold mb-8">📚 Course Levels</h2>
@@ -397,7 +399,7 @@ if (enrolled && course.hasLevels) {
         {course.previewUrl && (
           <section className="max-w-5xl mx-auto px-6 py-8">
             <h2 className="text-2xl font-bold mb-4">🎬 Preview Video</h2>
-            <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96" />
+            <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
           </section>
         )}
 
@@ -582,7 +584,7 @@ if (enrolled && course.hasLevels) {
             <div>
               <h1 className="text-xl md:text-2xl font-bold mb-6">🎬 Preview — {course.title}</h1>
               {course.previewUrl ? (
-                <video src={course.previewUrl} controls className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
+                <video src={course.previewUrl} controls controlsList="nodownload" className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
               ) : (
                 <div className="aspect-video w-full max-w-4xl rounded-2xl bg-[#111827] border border-white/10 flex items-center justify-center mb-6">
                   <div className="text-center text-gray-400">
@@ -608,7 +610,17 @@ if (enrolled && course.hasLevels) {
 
               <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
                 {activeLesson.videoUrl ? (
-                  <video src={activeLesson.videoUrl} controls className="w-full h-full" />
+                 <video
+  key={activeLesson.videoUrl}
+  controls
+  controlsList="nodownload"
+  className="w-full h-full"
+  playsInline
+>
+  <source src={activeLesson.videoUrl} type="video/mp4" />
+  <source src={activeLesson.videoUrl} type="video/webm" />
+  <source src={activeLesson.videoUrl} type="video/ogg" />
+</video>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <div className="text-center">
@@ -626,6 +638,18 @@ if (enrolled && course.hasLevels) {
                 </div>
               )}
 
+                 {activeLesson.pdfUrl && (
+  <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
+    <h3 className="font-bold mb-4">📄 Lesson PDF</h3>
+    <a
+      href={activeLesson.pdfUrl}
+      target="_blank"
+      className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl text-sm font-semibold transition-colors inline-block"
+    >
+      📥 Download PDF
+    </a>
+  </div>
+)}
               {/* Comments */}
               <div className="max-w-4xl">
                 <h3 className="font-bold text-lg mb-4">💬 Comments</h3>
