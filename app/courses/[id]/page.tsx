@@ -473,31 +473,11 @@ if (enrolled && course.hasLevels) {
         {/* Sidebar */}
         <div className={`
           fixed md:relative top-0 left-0 h-full z-40
-          w-80 bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden
+          bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden
           transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `} style={{ marginTop: "80px", width: `${sidebarWidth}px`, minWidth: "200px", maxWidth: "600px" }}>
-          {/* Resize Handle */}
-<div
-  className="hidden md:block w-1 bg-white/10 hover:bg-blue-500 cursor-col-resize transition-colors flex-shrink-0"
-  onMouseDown={(e) => {
-    e.preventDefault()
-    const startX = e.clientX
-    const startWidth = sidebarWidth
-    const onMouseMove = (e: MouseEvent) => {
-      const newWidth = startWidth + (e.clientX - startX)
-      if (newWidth >= 200 && newWidth <= 600) {
-        setSidebarWidth(newWidth)
-      }
-    }
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove)
-      document.removeEventListener("mouseup", onMouseUp)
-    }
-    document.addEventListener("mousemove", onMouseMove)
-    document.addEventListener("mouseup", onMouseUp)
-  }}
-/>
+     
           
           {/* Close button mobile */}
           <button
@@ -599,6 +579,27 @@ if (enrolled && course.hasLevels) {
             style={{ marginTop: "80px" }}
           />
         )}
+             {/* Resize Handle */}
+<div
+  className="hidden md:block w-1 bg-white/10 hover:bg-blue-500 cursor-col-resize transition-colors flex-shrink-0"
+  onMouseDown={(e) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+    const onMouseMove = (e: MouseEvent) => {
+      const newWidth = startWidth + (e.clientX - startX)
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth)
+      }
+    }
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove)
+      document.removeEventListener("mouseup", onMouseUp)
+    }
+    document.addEventListener("mousemove", onMouseMove)
+    document.addEventListener("mouseup", onMouseUp)
+  }}
+/>
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -698,6 +699,9 @@ if (enrolled && course.hasLevels) {
           )}
         </div>
       </div>
+      <footer className="border-t border-white/10 py-6 text-center text-gray-500 text-sm">
+  © 2026 A to Z Automation. All rights reserved.
+</footer>
     </main>
     
   )
