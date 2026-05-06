@@ -187,7 +187,7 @@ export default function Contact() {
       </section>
 
       <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm">
-        © 2025 A to Z Automation. All rights reserved.
+        © 2026 A to ZAutomation. All rights reserved.
       </footer>
     </main>
   )

@@ -97,6 +97,7 @@ export default function CoursePage() {
   const [submitting, setSubmitting] = useState(false)
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(320)
 
   useEffect(() => {
     if (!courseId) return
@@ -445,7 +446,7 @@ if (enrolled && course.hasLevels) {
         </section>
 
         <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm">
-          © 2025 A to Z Automation. All rights reserved.
+          © 2026 A to ZAutomation. All rights reserved.
         </footer>
       </main>
     )
@@ -475,7 +476,28 @@ if (enrolled && course.hasLevels) {
           w-80 bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden
           transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        `} style={{ marginTop: "80px" }}>
+        `} style={{ marginTop: "80px", width: `${sidebarWidth}px`, minWidth: "200px", maxWidth: "600px" }}>
+          {/* Resize Handle */}
+<div
+  className="hidden md:block w-1 bg-white/10 hover:bg-blue-500 cursor-col-resize transition-colors flex-shrink-0"
+  onMouseDown={(e) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+    const onMouseMove = (e: MouseEvent) => {
+      const newWidth = startWidth + (e.clientX - startX)
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth)
+      }
+    }
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove)
+      document.removeEventListener("mouseup", onMouseUp)
+    }
+    document.addEventListener("mousemove", onMouseMove)
+    document.addEventListener("mouseup", onMouseUp)
+  }}
+/>
           
           {/* Close button mobile */}
           <button

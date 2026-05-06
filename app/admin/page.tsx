@@ -260,7 +260,7 @@ export default function Admin() {
       </div>
 
       <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm mt-12">
-        © 2025 A to Z Automation. All rights reserved.
+        © 2026 A to ZAutomation. All rights reserved.
       </footer>
 
     </main>
