@@ -13,6 +13,7 @@ type Lesson = {
   videoUrl?: string
   description?: string
   pdfUrl?: string
+  thumbnailUrl?:string
   chapterId?: string
 }
 
@@ -633,7 +634,7 @@ if (enrolled && course.hasLevels) {
 
               <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
                 {activeLesson.videoUrl ? (
-                  <video src={activeLesson.videoUrl} controls controlsList="nodownload" className="w-full h-full" />
+                  <video src={activeLesson.videoUrl} controls controlsList="nodownload" poster={activeLesson.thumbnailUrl|| course.thumbnail } className="w-full h-full" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <div className="text-center">

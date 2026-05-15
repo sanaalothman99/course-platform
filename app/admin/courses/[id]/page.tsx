@@ -10,6 +10,7 @@ type Lesson = {
   videoUrl?: string
   description?: string
   pdfUrl?: string
+  thumbnailUrl?:string
   chapterId?: string
 }
 
@@ -34,6 +35,7 @@ function UserSearch({ onGrant }: { onGrant: (userId: string) => void }) {
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+
 
   const searchUsers = async (query: string) => {
     setSearch(query)
@@ -243,6 +245,7 @@ export default function ManageCourse() {
     image: null as File | null,
     preview: "",
   })
+  const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null)
 
   useEffect(() => {
     if (!courseId) return
@@ -449,6 +452,30 @@ export default function ManageCourse() {
       setUploadingPdf(null)
     }
   }
+  const uploadThumbnail = async (lessonId: string, file: File) => {
+  setUploadingThumbnail(lessonId)
+  try {
+    const token = localStorage.getItem("token")
+    const formData = new FormData()
+    formData.append("file", file)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+    const data = await res.json()
+    if (data.url) {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ thumbnailUrl: data.url }),
+      })
+      fetchCourse()
+    }
+  } finally {
+    setUploadingThumbnail(null)
+  }
+}
 
  const grantAccess = async (userId?: string) => {
   const id = userId || grantForm.userId
@@ -562,22 +589,26 @@ export default function ManageCourse() {
           </div>
         </div>
       )}
+<div className="flex gap-2 mb-2">
+  {lesson.videoUrl ? <span className="text-green-400 text-xs">✅ Video</span> : <span className="text-yellow-400 text-xs">⚠️ No video</span>}
+  {lesson.pdfUrl ? <span className="text-green-400 text-xs">✅ PDF</span> : <span className="text-gray-500 text-xs">📄 No PDF</span>}
+  {lesson.thumbnailUrl ? <span className="text-green-400 text-xs">✅ Thumbnail</span> : <span className="text-gray-500 text-xs">🖼️ No thumbnail</span>}
+</div>
 
-      <div className="flex gap-2 mb-2">
-        {lesson.videoUrl ? <span className="text-green-400 text-xs">✅ Video</span> : <span className="text-yellow-400 text-xs">⚠️ No video</span>}
-        {lesson.pdfUrl ? <span className="text-green-400 text-xs">✅ PDF</span> : <span className="text-gray-500 text-xs">📄 No PDF</span>}
-      </div>
-
-      <div className="flex gap-2">
-        <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-blue-500 px-3 py-1 rounded-lg text-xs transition-colors">
-          {uploadingLesson === lesson.id ? "Uploading..." : "📹 Video"}
-          <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(lesson.id, f) }} />
-        </label>
-        <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-purple-500 px-3 py-1 rounded-lg text-xs transition-colors">
-          {uploadingPdf === lesson.id ? "Uploading..." : "📄 PDF"}
-          <input type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPdf(lesson.id, f) }} />
-        </label>
-      </div>
+<div className="flex gap-2">
+  <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-blue-500 px-3 py-1 rounded-lg text-xs transition-colors">
+    {uploadingLesson === lesson.id ? "Uploading..." : "📹 Video"}
+    <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(lesson.id, f) }} />
+  </label>
+  <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-purple-500 px-3 py-1 rounded-lg text-xs transition-colors">
+    {uploadingPdf === lesson.id ? "Uploading..." : "📄 PDF"}
+    <input type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPdf(lesson.id, f) }} />
+  </label>
+  <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-green-500 px-3 py-1 rounded-lg text-xs transition-colors">
+    {uploadingThumbnail === lesson.id ? "Uploading..." : "🖼️ Thumbnail"}
+    <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadThumbnail(lesson.id, f) }} />
+  </label>
+</div>
     </div>
   )
 
