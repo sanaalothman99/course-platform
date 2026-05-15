@@ -633,9 +633,28 @@ if (enrolled && course.hasLevels) {
               </div>
 
               <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
-                {activeLesson.videoUrl ? (
-                  <video src={activeLesson.videoUrl} controls controlsList="nodownload" poster={activeLesson.thumbnailUrl|| course.thumbnail } className="w-full h-full" />
-                ) : (
+               {activeLesson.videoUrl ? (
+  <div className="relative w-full h-full">
+    {activeLesson.thumbnailUrl && (
+      <img
+        src={activeLesson.thumbnailUrl}
+        alt={activeLesson.title}
+        className="absolute inset-0 w-full h-full object-cover z-10 cursor-pointer"
+        onClick={(e) => {
+          (e.target as HTMLElement).style.display = 'none'
+          const video = (e.target as HTMLElement).nextElementSibling as HTMLVideoElement
+          video?.play()
+        }}
+      />
+    )}
+    <video
+      src={activeLesson.videoUrl}
+      controls
+      controlsList="nodownload"
+      className="w-full h-full"
+    />
+  </div>
+) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <div className="text-center">
                       <p className="text-5xl mb-4">🎬</p>
