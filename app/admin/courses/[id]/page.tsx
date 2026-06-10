@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Navbar from "../../../components/Navbar"
+import React from "react"
+
 
 type Lesson = {
   id: string
@@ -541,7 +543,7 @@ export default function ManageCourse() {
     }
   }
 
-  const LessonCard = ({ lesson }: { lesson: Lesson }) => (
+  const LessonCard = React.memo(({ lesson }: { lesson: Lesson }) => (
     <div className="bg-[#0d1426] border border-white/5 rounded-xl p-4">
       <div className="flex justify-between items-center mb-3">
         <div>
@@ -610,7 +612,7 @@ export default function ManageCourse() {
   </label>
 </div>
     </div>
-  )
+  ))
 
   return (
     <main className="min-h-screen bg-[#0a0f1e] text-white">
