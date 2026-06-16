@@ -72,7 +72,11 @@ export default function Navbar() {
           }`} />
         </Link>
       ))}
-
+        
+            <div
+             id="language-switcher"
+               className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-2 text-sm text-white"
+              />
             <div className="w-px h-5 bg-white/10 mx-2" />
 
             {user ? (
@@ -132,6 +136,10 @@ export default function Navbar() {
               </Link>
             ))}
 
+               <div
+             id="language-switcher"
+                className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-2 text-sm text-white"
+                />
             <div className="h-px bg-white/5 my-2" />
 
             {user ? (
