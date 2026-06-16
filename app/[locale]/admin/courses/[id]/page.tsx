@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useRouter, useParams } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
+import { useParams } from "next/navigation"
 import Navbar from "../../../components/Navbar"
 import React from "react"
 

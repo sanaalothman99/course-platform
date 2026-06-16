@@ -1,7 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { Link, useRouter, useParams } from "@/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
+import { useParams } from "next/navigation"
 import Navbar from "../../components/Navbar"
 
 type Lesson = { id: string; title: string; position: number; videoUrl?: string; description?: string; pdfUrl?: string; chapterId?: string }
