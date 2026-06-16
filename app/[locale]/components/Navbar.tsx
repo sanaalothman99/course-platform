@@ -1,5 +1,4 @@
 "use client"
-import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import { Link, useRouter, usePathname } from "@/i18n/navigation"
@@ -7,6 +6,7 @@ import { Link, useRouter, usePathname } from "@/i18n/navigation"
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const locale = useLocale()
@@ -15,6 +15,12 @@ export default function Navbar() {
   useEffect(() => {
     const userData = localStorage.getItem("user")
     if (userData) setUser(JSON.parse(userData))
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const handleLogout = () => {
@@ -29,82 +35,159 @@ export default function Navbar() {
     router.replace(pathname, { locale: next })
   }
 
+  const navLinks = [
+    { href: "/courses", label: t("courses") },
+    { href: "/contact", label: t("contact") },
+  ]
+
   return (
-    <nav className="flex justify-between items-center px-10 py-5 border-b border-white/10 bg-black sticky top-0 z-50">
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-[#0a0f1e]/95 backdrop-blur-xl border-b border-blue-500/20 shadow-lg shadow-blue-500/5"
+          : "bg-transparent"
+      }`}>
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
-      <Link href="/">
-        <Image src="/logo.jpg" alt="A to Z Automation" width={180} height={60} className="logo-animate mix-blend-lighten" />
-      </Link>
+          {/* Logo */}
+          <Link href="/">
+            <div className="flex flex-col">
+              <span className="text-2xl font-black text-white typewriter">
+                A to Z Automation
+              </span>
+              <span className="text-xs tracking-[0.3em] text-blue-400 font-medium">
+                PROFESSIONAL PLC TRAINING
+              </span>
+            </div>
+          </Link>
 
-      {/* Desktop */}
-      <div className="hidden md:flex gap-8 text-sm text-gray-300 items-center font-medium">
-        <Link href="/courses" className="hover:text-blue-400 transition-colors">{t("courses")}</Link>
-        <Link href="/contact" className="hover:text-blue-400 transition-colors">{t("contact")}</Link>
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative px-5 py-2 text-base font-semibold transition-all duration-300 rounded-full group ${
+                  pathname === link.href
+                    ? "text-blue-400"
+                    : "text-gray-300 hover:text-white"
+                }`}
+              >
+                {link.label}
+                <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-px bg-blue-400 transition-all duration-300 ${
+                  pathname === link.href ? "w-4/5" : "w-0 group-hover:w-4/5"
+                }`} />
+              </Link>
+            ))}
 
-        {user ? (
-          <div className="flex items-center gap-4">
-            <Link
-              href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
-              className="hover:text-blue-400 transition-colors text-gray-300"
-            >
-              {user.role === "ADMIN" ? `⚙️ ${t("admin")}` : `👋 ${user.name}`}
-            </Link>
+            <div className="w-px h-5 bg-white/10 mx-2" />
+
+            {user ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/30 text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                >
+                  <span className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </span>
+                  {user.role === "ADMIN" ? t("admin") : user.name}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-500 hover:text-red-400 text-sm px-3 py-2 rounded-full hover:bg-red-400/10 transition-all duration-300"
+                >
+                  {t("logout")}
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login/member"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-600/30 hover:scale-105"
+              >
+                {t("login")}
+              </Link>
+            )}
+
             <button
-              onClick={handleLogout}
-              className="border border-white/20 hover:border-red-500/50 text-gray-400 hover:text-red-400 px-4 py-2 rounded-full text-sm transition-colors"
+              onClick={toggleLocale}
+              className="border border-white/20 hover:border-blue-400 text-gray-300 hover:text-blue-400 px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
             >
-              {t("logout")}
+              {locale === "en" ? "AR" : "EN"}
             </button>
           </div>
-        ) : (
-          <Link href="/login/member" className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm transition-colors">
-            {t("login")}
-          </Link>
-        )}
 
-        {/* Language Toggle */}
-        <button
-          onClick={toggleLocale}
-          className="border border-white/20 hover:border-blue-400 text-gray-300 hover:text-blue-400 px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
-        >
-          {locale === "en" ? "AR" : "EN"}
-        </button>
-      </div>
-
-      {/* Mobile Button */}
-      <button className="md:hidden text-white text-2xl" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? "✕" : "☰"}
-      </button>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-black border-b border-white/10 flex flex-col px-8 py-6 gap-6 text-gray-300 md:hidden">
-          <Link href="/courses" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">{t("courses")}</Link>
-          <Link href="/contact" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">{t("contact")}</Link>
-          {user ? (
-            <>
-              <Link
-                href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
-                onClick={() => setIsOpen(false)}
-                className="hover:text-blue-400 transition-colors"
-              >
-                {user.role === "ADMIN" ? `⚙️ ${t("admin")}` : `👋 ${user.name}`}
-              </Link>
-              <button onClick={handleLogout} className="text-red-400 text-left">{t("logout")}</button>
-            </>
-          ) : (
-            <Link href="/login/member" onClick={() => setIsOpen(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-full text-sm text-center transition-colors">
-              {t("login")}
-            </Link>
-          )}
+          {/* Mobile Button */}
           <button
-            onClick={toggleLocale}
-            className="border border-white/20 text-gray-300 px-4 py-2 rounded-full text-sm font-bold w-fit transition-colors"
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all"
           >
-            {locale === "en" ? "🌐 العربية" : "🌐 English"}
+            <span className={`w-5 h-px bg-white transition-all duration-300 ${isOpen ? "rotate-45 translate-y-1.5" : ""}`} />
+            <span className={`w-5 h-px bg-white transition-all duration-300 ${isOpen ? "opacity-0" : ""}`} />
+            <span className={`w-5 h-px bg-white transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-1.5" : ""}`} />
           </button>
         </div>
-      )}
-    </nav>
+
+        {/* Mobile Menu */}
+        <div className={`md:hidden transition-all duration-300 overflow-hidden ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="bg-[#0a0f1e]/98 backdrop-blur-xl border-t border-white/5 px-6 py-6 flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  pathname === link.href
+                    ? "text-blue-400 bg-blue-500/10"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="h-px bg-white/5 my-2" />
+
+            {user ? (
+              <>
+                <Link
+                  href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <span className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </span>
+                  {user.role === "ADMIN" ? t("admin") : user.name}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-3 rounded-xl text-sm text-red-400 hover:bg-red-400/10 text-left transition-all"
+                >
+                  {t("logout")}
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login/member"
+                onClick={() => setIsOpen(false)}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl text-sm font-semibold text-center transition-all"
+              >
+                {t("login")}
+              </Link>
+            )}
+
+            <button
+              onClick={toggleLocale}
+              className="border border-white/20 text-gray-300 px-4 py-2 rounded-full text-sm font-bold w-fit transition-colors"
+            >
+              {locale === "en" ? "🌐 العربية" : "🌐 English"}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="h-20" />
+    </>
   )
 }
