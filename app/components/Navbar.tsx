@@ -73,10 +73,7 @@ export default function Navbar() {
         </Link>
       ))}
         
-            <div
-             id="language-switcher"
-              className="min-w-[100px]"
-                ></div>
+            
             <div className="w-px h-5 bg-white/10 mx-2" />
 
             {user ? (
@@ -136,10 +133,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-              <div
-               id="language-switcher"
-                className="min-w-[100px]"
-                            ></div>
+           
             <div className="h-px bg-white/5 my-2" />
 
             {user ? (
