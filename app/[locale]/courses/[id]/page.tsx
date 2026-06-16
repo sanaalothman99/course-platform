@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { useParams } from "next/navigation"
 import Navbar from "../../components/Navbar"
 
-type Lesson = { id: string; title: string; position: number; videoUrl?: string; description?: string; pdfUrl?: string; chapterId?: string }
+type Lesson = { id: string; title: string; position: number; videoUrl?: string; description?: string; pdfUrl?: string; thumbnailUrl?: string; chapterId?: string }
 type Chapter = { id: string; title: string; position: number; lessons: Lesson[] }
 type Course = { id: string; title: string; description: string; price: number; level: string; thumbnail?: string; previewUrl?: string; comingSoon: boolean; hasLevels: boolean; lessons: Lesson[]; chapters: Chapter[] }
 
@@ -26,8 +26,10 @@ function SubCourses({ courseId }: { courseId: string }) {
       {subCourses.map((sub) => (
         <div key={sub.id} onClick={() => router.push(`/courses/${sub.id}`)}
           className="bg-[#111827] border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-500/50 hover:-translate-y-1 transition-all">
-          <div className="h-40 bg-gradient-to-br from-blue-600 to-blue-800">
-            {sub.thumbnail ? <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain bg-[#0a0f1e]" /> : <div className="w-full h-full flex items-center justify-center text-5xl">🎓</div>}
+          <div className="aspect-square bg-[#0a0f1e] overflow-hidden">
+            {sub.thumbnail
+              ? <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-contain p-4" />
+              : <div className="w-full h-full flex items-center justify-center text-5xl">🎓</div>}
           </div>
           <div className="p-6">
             <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{sub.level}</span>
@@ -62,10 +64,14 @@ export default function CoursePage() {
   const [newComment, setNewComment] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(320)
 
   useEffect(() => {
     if (!courseId) return
-    fetchCourse(); checkEnrollment(); fetchProgress()
+    fetchCourse()
+    checkEnrollment()
+    fetchProgress()
   }, [courseId])
 
   const fetchCourse = async () => {
@@ -130,7 +136,8 @@ export default function CoursePage() {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ content: newComment }),
       })
-      setNewComment(""); fetchComments(activeLesson.id)
+      setNewComment("")
+      fetchComments(activeLesson.id)
     } finally { setSubmitting(false) }
   }
 
@@ -162,7 +169,11 @@ export default function CoursePage() {
   const completedCount = completed.size
   const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
 
-  if (loading) return <main className="min-h-screen bg-[#0a0f1e] text-white flex items-center justify-center"><p className="text-gray-400">{t("loading" as any)}</p></main>
+  if (loading) return (
+    <main className="min-h-screen bg-[#0a0f1e] text-white flex items-center justify-center">
+      <p className="text-gray-400">Loading...</p>
+    </main>
+  )
 
   if (!course) return (
     <main className="min-h-screen bg-[#0a0f1e] text-white flex items-center justify-center">
@@ -174,106 +185,192 @@ export default function CoursePage() {
     </main>
   )
 
-  if (enrolled && course.hasLevels) return (
-    <main className="min-h-screen bg-[#0a0f1e] text-white">
-      <Navbar />
-      <section className="px-6 py-24">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-          <p className="text-gray-400 mb-16">{course.description}</p>
-          <h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2>
-          <SubCourses courseId={course.id} />
-        </div>
-      </section>
-    </main>
-  )
-
-  if (!enrolled) return (
-    <main className="min-h-screen bg-[#0a0f1e] text-white">
-      <Navbar />
-      <section className="relative py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{course.level}</span>
-            <h1 className="text-4xl font-bold mt-4 mb-4">{course.title}</h1>
-            <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
-            <div className="flex gap-6 text-sm text-gray-400 mb-8">
-              {course.hasLevels ? <span>{t("multipleLevels")}</span> : <span>{t("lessonsCount", { count: totalLessons })}</span>}
+  // Coming Soon — no content shown
+  if (course.comingSoon) {
+    return (
+      <main className="min-h-screen bg-[#0a0f1e] text-white">
+        <Navbar />
+        <section className="relative py-12 md:py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 rounded-full">
+                🔜 Coming Soon
+              </span>
+              <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
+              <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
+              <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-4">
+                <p className="text-yellow-400 font-semibold text-sm">🚧 This course is under development</p>
+                <p className="text-gray-400 text-xs mt-1">Stay tuned — we'll notify you when it's ready!</p>
+              </div>
             </div>
-            <div className="flex items-center gap-6">
-              {course.comingSoon ? (
-                <span className="bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-6 py-3 rounded-full font-semibold">🔜 Coming Soon</span>
-              ) : course.hasLevels ? (
-                <span className="text-gray-400 text-sm">{t("selectLevel")}</span>
-              ) : (
-                <>
-                  <span className="text-4xl font-bold">${course.price}</span>
-                  <button onClick={handleEnroll} disabled={enrolling} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-8 py-3 rounded-full font-semibold transition-colors">
-                    {enrolling ? t("processing") : t("enrollNow")}
-                  </button>
-                </>
+            <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
+              {course.thumbnail
+                ? <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
+                : <div className="w-full h-full bg-gradient-to-br from-yellow-600/30 to-blue-800 flex items-center justify-center text-7xl">🔜</div>}
+            </div>
+          </div>
+        </section>
+
+        {course.hasLevels && (
+          <section className="max-w-5xl mx-auto px-6 py-12">
+            <h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2>
+            <SubCourses courseId={course.id} />
+          </section>
+        )}
+
+        <Link href="/courses" className="block text-center text-gray-400 hover:text-white text-sm py-8 transition-colors">
+          {t("backToCourses")}
+        </Link>
+      </main>
+    )
+  }
+
+  // Enrolled + has levels
+  if (enrolled && course.hasLevels) {
+    return (
+      <main className="min-h-screen bg-[#0a0f1e] text-white">
+        <Navbar />
+        <section className="px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
+              <div>
+                <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
+                <p className="text-gray-400 mb-6">{course.description}</p>
+              </div>
+              {course.thumbnail && (
+                <div className="h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+                </div>
               )}
             </div>
+            {course.previewUrl && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold mb-4">{t("previewSection")}</h2>
+                <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
+              </div>
+            )}
+            <h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2>
+            <SubCourses courseId={course.id} />
           </div>
-          <div className="relative h-64 rounded-2xl overflow-hidden border border-white/10">
-            {course.thumbnail ? <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" /> : <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-8xl">🎓</div>}
-          </div>
-        </div>
-      </section>
-
-      {course.previewUrl && (
-        <section className="max-w-5xl mx-auto px-6 py-8">
-          <h2 className="text-2xl font-bold mb-4">{t("previewSection")}</h2>
-          <video src={course.previewUrl} controls className="w-full rounded-2xl max-h-96" />
         </section>
-      )}
+      </main>
+    )
+  }
 
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        {course.hasLevels ? (
-          <div><h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2><SubCourses courseId={course.id} /></div>
-        ) : (
-          <div>
-            <h2 className="text-2xl font-bold mb-8">{t("courseContent")}</h2>
-            <div className="flex flex-col gap-3">
-              {course.chapters?.length > 0 ? course.chapters.map((chapter) => (
-                <div key={chapter.id} className="bg-[#111827] border border-white/10 rounded-xl overflow-hidden">
-                  <div className="px-6 py-4 flex items-center gap-3 bg-white/5">
-                    <span className="text-blue-400 font-bold text-sm">#{chapter.position}</span>
-                    <span className="font-semibold">{chapter.title}</span>
-                    <span className="ml-auto text-gray-400 text-xs">{chapter.lessons.length} lessons</span>
-                  </div>
-                  {chapter.lessons.map((lesson, i) => (
-                    <div key={lesson.id} className="px-6 py-3 flex items-center gap-4 border-t border-white/5">
-                      <span className="text-gray-500 text-sm w-6">{i + 1}</span>
-                      <span className="flex-1 text-sm text-gray-300">{lesson.title}</span>
-                      <span className="text-gray-600 text-sm">🔒</span>
-                    </div>
-                  ))}
-                </div>
-              )) : course.lessons.map((lesson, i) => (
-                <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-6 py-4 flex items-center gap-4">
-                  <span className="text-blue-400 font-bold w-8">{i + 1}</span>
-                  <span className="flex-1">{lesson.title}</span>
-                  <span className="text-gray-600 text-sm">{t("locked")}</span>
-                </div>
-              ))}
+  // Not enrolled — landing page
+  if (!enrolled) {
+    return (
+      <main className="min-h-screen bg-[#0a0f1e] text-white">
+        <Navbar />
+        <section className="relative py-12 md:py-20 px-6 bg-gradient-to-b from-blue-900/20 to-[#0a0f1e]">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div>
+              <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{course.level}</span>
+              <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
+              <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
+              <div className="flex gap-6 text-sm text-gray-400 mb-8">
+                {course.hasLevels
+                  ? <span>{t("multipleLevels")}</span>
+                  : <span>📖 {totalLessons} {t("lessonsCount", { count: totalLessons })}</span>}
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                {course.hasLevels ? (
+                  <span className="text-gray-400 text-sm">{t("selectLevel")}</span>
+                ) : (
+                  <>
+                    <span className="text-3xl md:text-4xl font-bold">${course.price}</span>
+                    <button onClick={handleEnroll} disabled={enrolling}
+                      className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-8 py-3 rounded-full font-semibold transition-colors">
+                      {enrolling ? t("processing") : t("enrollNow")}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
+              {course.thumbnail
+                ? <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
+                : <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-7xl">🎓</div>}
             </div>
           </div>
-        )}
-      </section>
-      <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm">{tf("copy")}</footer>
-    </main>
-  )
+        </section>
 
-  // Course Player
+        {course.previewUrl && (
+          <section className="max-w-5xl mx-auto px-6 py-8">
+            <h2 className="text-2xl font-bold mb-4">{t("previewSection")}</h2>
+            <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
+          </section>
+        )}
+
+        <section className="max-w-5xl mx-auto px-6 py-12">
+          {course.hasLevels ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2>
+              <SubCourses courseId={course.id} />
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold mb-8">{t("courseContent")}</h2>
+              <div className="flex flex-col gap-3">
+                {course.chapters?.length > 0 ? course.chapters.map((chapter) => (
+                  <div key={chapter.id} className="bg-[#111827] border border-white/10 rounded-xl overflow-hidden">
+                    <div className="px-4 md:px-6 py-4 flex items-center gap-3 bg-white/5">
+                      <span className="text-blue-400 font-bold text-sm">#{chapter.position}</span>
+                      <span className="font-semibold text-sm md:text-base">{chapter.title}</span>
+                      <span className="ml-auto text-gray-400 text-xs">{chapter.lessons.length} lessons</span>
+                    </div>
+                    {chapter.lessons.map((lesson, i) => (
+                      <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
+                        <span className="text-gray-500 text-sm w-6">{i + 1}</span>
+                        <span className="flex-1 text-sm text-gray-300">{lesson.title}</span>
+                        <span className="text-gray-600 text-sm">{t("locked")}</span>
+                      </div>
+                    ))}
+                  </div>
+                )) : course.lessons.map((lesson, i) => (
+                  <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-4 md:px-6 py-4 flex items-center gap-4">
+                    <span className="text-blue-400 font-bold w-8">{i + 1}</span>
+                    <span className="flex-1 text-sm">{lesson.title}</span>
+                    <span className="text-gray-600 text-sm">{t("locked")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+        <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm">{tf("copy")}</footer>
+      </main>
+    )
+  }
+
+  // Course Player — enrolled
   return (
     <main className="min-h-screen bg-[#0a0f1e] text-white">
       <Navbar />
-      <div className="flex" style={{ height: "calc(100vh - 80px)" }}>
-        <div className="w-80 bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden flex-shrink-0">
-          <div className="bg-blue-700 p-6">
+
+      {/* Mobile Sidebar Toggle */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <button onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+          {sidebarOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
+      <div className="flex relative" style={{ height: "calc(100vh - 80px)" }}>
+
+        {/* Sidebar */}
+        <div className={`
+          fixed md:relative top-0 left-0 h-full z-40
+          bg-[#0d1426] border-r border-white/10 flex flex-col overflow-hidden
+          transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `} style={{ marginTop: "80px", width: `${sidebarWidth}px`, minWidth: "200px", maxWidth: "600px" }}>
+
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+
+          <div className="bg-blue-700 p-4 md:p-6">
             <Link href="/courses" className="text-white/70 text-sm hover:text-white mb-3 inline-block">{t("backToCourses")}</Link>
-            <h2 className="text-lg font-bold">{course.title}</h2>
+            <h2 className="text-base md:text-lg font-bold">{course.title}</h2>
             <div className="mt-3">
               <div className="flex justify-between text-sm text-white/70 mb-1">
                 <span>{t("progress")}</span><span>{progress}%</span>
@@ -287,20 +384,26 @@ export default function CoursePage() {
 
           <div className="flex-1 overflow-y-auto">
             {course.previewUrl && (
-              <div onClick={() => { setActiveLesson(null); setActiveTab("preview") }}
+              <div onClick={() => { setActiveLesson(null); setActiveTab("preview"); setSidebarOpen(false) }}
                 className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 transition-colors ${activeTab === "preview" && !activeLesson ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}>
                 <span className="text-yellow-400">🎬</span>
                 <div><p className="text-sm font-medium">{t("previewVideo")}</p><p className="text-xs text-gray-400">{t("freeIntro")}</p></div>
               </div>
             )}
+
             {course.chapters?.length > 0 ? course.chapters.map((chapter) => (
               <div key={chapter.id}>
-                <div onClick={() => toggleChapter(chapter.id)} className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 bg-white/3 hover:bg-white/5 transition-colors">
+                <div onClick={() => toggleChapter(chapter.id)}
+                  className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 hover:bg-white/5 transition-colors">
                   <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶"}</span>
-                  <div className="flex-1"><p className="text-sm font-bold">{chapter.title}</p><p className="text-xs text-gray-400">{chapter.lessons.length} lessons</p></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold">{chapter.title}</p>
+                    <p className="text-xs text-gray-400">{chapter.lessons.length} lessons</p>
+                  </div>
                 </div>
                 {expandedChapters.has(chapter.id) && chapter.lessons.sort((a, b) => a.position - b.position).map((lesson) => (
-                  <div key={lesson.id} onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id) }}
+                  <div key={lesson.id}
+                    onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
                     className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-8 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}>
                     <button onClick={(e) => { e.stopPropagation(); toggleCompleted(lesson.id) }}
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${completed.has(lesson.id) ? "bg-green-500 border-green-500" : "border-gray-500"}`}>
@@ -311,7 +414,8 @@ export default function CoursePage() {
                 ))}
               </div>
             )) : course.lessons.sort((a, b) => a.position - b.position).map((lesson) => (
-              <div key={lesson.id} onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id) }}
+              <div key={lesson.id}
+                onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
                 className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}>
                 <button onClick={(e) => { e.stopPropagation(); toggleCompleted(lesson.id) }}
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${completed.has(lesson.id) ? "bg-green-500 border-green-500" : "border-gray-500"}`}>
@@ -323,15 +427,44 @@ export default function CoursePage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8">
+        {/* Mobile Overlay */}
+        {sidebarOpen && (
+          <div onClick={() => setSidebarOpen(false)}
+            className="md:hidden fixed inset-0 bg-black/50 z-30"
+            style={{ marginTop: "80px" }} />
+        )}
+
+        {/* Resize Handle */}
+        <div className="hidden md:block w-1 bg-white/10 hover:bg-blue-500 cursor-col-resize transition-colors flex-shrink-0"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            const startX = e.clientX
+            const startWidth = sidebarWidth
+            const onMouseMove = (e: MouseEvent) => {
+              const newWidth = startWidth + (e.clientX - startX)
+              if (newWidth >= 200 && newWidth <= 600) setSidebarWidth(newWidth)
+            }
+            const onMouseUp = () => {
+              document.removeEventListener("mousemove", onMouseMove)
+              document.removeEventListener("mouseup", onMouseUp)
+            }
+            document.addEventListener("mousemove", onMouseMove)
+            document.addEventListener("mouseup", onMouseUp)
+          }} />
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {activeTab === "preview" && !activeLesson && (
             <div>
-              <h1 className="text-2xl font-bold mb-6">{t("previewPlayerTitle", { title: course.title })}</h1>
+              <h1 className="text-xl md:text-2xl font-bold mb-6">{t("previewPlayerTitle", { title: course.title })}</h1>
               {course.previewUrl ? (
                 <video src={course.previewUrl} controls controlsList="nodownload" className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
               ) : (
                 <div className="aspect-video w-full max-w-4xl rounded-2xl bg-[#111827] border border-white/10 flex items-center justify-center mb-6">
-                  <div className="text-center text-gray-400"><p className="text-6xl mb-4">🎬</p><p>{t("selectLesson")}</p></div>
+                  <div className="text-center text-gray-400">
+                    <p className="text-5xl mb-4">🎬</p>
+                    <p>{t("selectLesson")}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -339,45 +472,63 @@ export default function CoursePage() {
 
           {activeLesson && (
             <div>
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">{activeLesson.title}</h1>
+              <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+                <h1 className="text-xl md:text-2xl font-bold">{activeLesson.title}</h1>
                 <button onClick={() => toggleCompleted(activeLesson.id)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${completed.has(activeLesson.id) ? "bg-green-600 hover:bg-green-500" : "bg-white/10 hover:bg-white/20"}`}>
                   {completed.has(activeLesson.id) ? t("completed") : t("markComplete")}
                 </button>
               </div>
-              <div className="aspect-video w-full max-w-full rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
+
+              <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
                 {activeLesson.videoUrl ? (
-                  <video src={activeLesson.videoUrl} controls controlsList="nodownload" className="w-full h-full" />
+                  <div className="relative w-full h-full">
+                    {activeLesson.thumbnailUrl && (
+                      <img src={activeLesson.thumbnailUrl} alt={activeLesson.title}
+                        className="absolute inset-0 w-full h-full object-cover z-10 cursor-pointer"
+                        onClick={(e) => {
+                          (e.target as HTMLElement).style.display = "none"
+                          const video = (e.target as HTMLElement).nextElementSibling as HTMLVideoElement
+                          video?.play()
+                        }} />
+                    )}
+                    <video src={activeLesson.videoUrl} controls controlsList="nodownload" className="w-full h-full" />
+                  </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <div className="text-center"><p className="text-6xl mb-4">🎬</p><p>{t("videoComingSoon")}</p></div>
+                    <div className="text-center">
+                      <p className="text-5xl mb-4">🎬</p>
+                      <p>{t("videoComingSoon")}</p>
+                    </div>
                   </div>
                 )}
               </div>
+
               {activeLesson.description && (
                 <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
                   <h3 className="font-bold mb-2">{t("aboutLesson")}</h3>
                   <p className="text-gray-400">{activeLesson.description}</p>
                 </div>
               )}
+
               {activeLesson.pdfUrl && (
-                <div className="max-w-4xl mb-8">
+                <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
                   <h3 className="font-bold mb-4">{t("attachments")}</h3>
-                  <a href={activeLesson.pdfUrl} target="_blank" className="bg-[#111827] border border-white/10 rounded-xl px-5 py-4 flex items-center gap-4 hover:border-blue-500/50 transition-all">
-                    <span className="text-red-400 text-2xl">📄</span>
-                    <span className="text-sm font-medium">{t("downloadPdf")}</span>
-                    <span className="ml-auto text-blue-400 text-sm">{t("download")}</span>
+                  <a href={activeLesson.pdfUrl} target="_blank"
+                    className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl text-sm font-semibold transition-colors inline-block">
+                    📥 {t("downloadPdf")}
                   </a>
                 </div>
               )}
+
               <div className="max-w-4xl">
-                <h2 className="text-2xl font-bold mb-6">{t("comments")}</h2>
-                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
-                  <textarea rows={3} placeholder={t("commentPlaceholder")} value={newComment} onChange={(e) => setNewComment(e.target.value)}
-                    className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none mb-4" />
-                  <button onClick={submitComment} disabled={!newComment || submitting}
-                    className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-6 py-2 rounded-xl text-sm font-semibold transition-colors">
+                <h3 className="font-bold text-lg mb-4">{t("comments")}</h3>
+                <div className="flex gap-3 mb-6">
+                  <input value={newComment} onChange={(e) => setNewComment(e.target.value)}
+                    placeholder={t("commentPlaceholder")}
+                    className="flex-1 bg-[#111827] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                  <button onClick={submitComment} disabled={submitting || !newComment}
+                    className="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-xl text-sm font-semibold disabled:opacity-50">
                     {submitting ? t("sending") : t("postComment")}
                   </button>
                 </div>
@@ -408,6 +559,10 @@ export default function CoursePage() {
           )}
         </div>
       </div>
+
+      <footer className="border-t border-white/10 py-6 text-center text-gray-500 text-sm">
+        {tf("copy")}
+      </footer>
     </main>
   )
 }
