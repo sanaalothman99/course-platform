@@ -47,18 +47,18 @@ export default function Courses() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {courses.map((course) => (
               <div key={course.id} className="bg-[#111827] border border-white/10 rounded-3xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-                <div className="relative h-48 bg-gradient-to-br from-blue-600 to-blue-800">
+                <div className="aspect-square bg-[#0a0f1e] overflow-hidden">
                   {course.thumbnail ? (
-                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-6xl">🎓</div>
+                    <div className="w-full h-full flex items-center justify-center text-6xl">🎓</div>
                   )}
                 </div>
                 <div className="p-6">
                   <div className="flex gap-2 mb-3">
                     <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{course.level}</span>
                     {course.comingSoon && (
-                      <span className="text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">🔜 {t("lessonsCount", { count: 0 }).replace(/\d+/, "") || "Coming Soon"}</span>
+                      <span className="text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">🔜 Coming Soon</span>
                     )}
                   </div>
                   <h3 className="text-xl font-bold mb-2">{course.title}</h3>

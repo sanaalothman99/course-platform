@@ -2,7 +2,78 @@
 import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { Link, useRouter } from "@/i18n/navigation"
-import Image from "next/image"
+import Navbar from "../components/Navbar"
+
+function ResetDevice() {
+  const [search, setSearch] = useState("")
+  const [users, setUsers] = useState<any[]>([])
+  const [success, setSuccess] = useState("")
+
+  const searchUsers = async (query: string) => {
+    setSearch(query)
+    if (!query) { setUsers([]); return }
+    const token = localStorage.getItem("token")
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    const filtered = (Array.isArray(data) ? data : []).filter((u: any) =>
+      u.name.toLowerCase().includes(query.toLowerCase()) ||
+      u.email.toLowerCase().includes(query.toLowerCase())
+    )
+    setUsers(filtered)
+  }
+
+  const resetDevice = async (userId: string) => {
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-device`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ userId }),
+    })
+    setSuccess("Device reset successfully!")
+    setUsers([])
+    setSearch("")
+    setTimeout(() => setSuccess(""), 3000)
+  }
+
+  return (
+    <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-12">
+      <h2 className="text-xl font-bold mb-4">📱 Reset Student Device</h2>
+      {success && (
+        <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl text-sm mb-4">
+          ✅ {success}
+        </div>
+      )}
+      <input
+        type="text"
+        placeholder="Search student by name or email..."
+        value={search}
+        onChange={(e) => searchUsers(e.target.value)}
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 mb-3"
+      />
+      {users.map((user) => (
+        <div key={user.id} className="bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+              {user.name[0]}
+            </div>
+            <div>
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-gray-400 text-xs">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => resetDevice(user.id)}
+            className="bg-red-600/20 text-red-400 border border-red-400/30 px-3 py-1 rounded-lg text-xs hover:bg-red-600/30 transition-colors"
+          >
+            Reset Device
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function Admin() {
   const router = useRouter()
@@ -26,75 +97,97 @@ export default function Admin() {
     try {
       const [coursesRes, ordersRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/all`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/all`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ])
       const coursesData = await coursesRes.json()
       const ordersData = await ordersRes.json()
       setCourses(Array.isArray(coursesData) ? coursesData : [])
       setOrders(Array.isArray(ordersData) ? ordersData : [])
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deleteCourse = async (id: string) => {
     if (!confirm(t("deleteConfirm"))) return
     const token = localStorage.getItem("token")
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } })
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
     fetchData()
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    router.push("/")
   }
 
   const totalRevenue = orders.reduce((acc, o) => acc + (o.course?.price || 0), 0)
 
   return (
     <main className="min-h-screen bg-[#0a0f1e] text-white">
-      <nav className="flex justify-between items-center px-10 py-5 border-b border-white/10 bg-black sticky top-0 z-50">
-        <Link href="/"><Image src="/logo.jpg" alt="A to Z Automation" width={140} height={45} className="mix-blend-lighten" /></Link>
-        <div className="flex items-center gap-4">
-          <span className="text-yellow-400 text-sm font-semibold">{t("panelTitle")}</span>
-          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-full text-sm transition-colors">{t("logout")}</button>
-        </div>
-      </nav>
+      <Navbar />
 
-      <div className="max-w-6xl mx-auto px-8 py-12">
-        <div className="mb-12">
-          <h1 className="text-4xl font-extrabold mb-2">{t("dashTitle")}</h1>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
+
+        <div className="mb-8 md:mb-12">
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">{t("dashTitle")}</h1>
           <p className="text-gray-400">{t("dashSubtitle")}</p>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          {[
-            { label: t("totalStudents"), value: new Set(orders.map((o: any) => o.user?.id)).size, color: "text-blue-400" },
-            { label: t("totalCourses"), value: courses.length, color: "text-green-400" },
-            { label: t("totalOrders"), value: orders.length, color: "text-purple-400" },
-            { label: t("totalRevenue"), value: `$${totalRevenue}`, color: "text-yellow-400" },
-          ].map((s, i) => (
-            <div key={i} className="bg-[#111827] border border-white/10 rounded-2xl p-6">
-              <p className="text-gray-400 text-sm mb-1">{s.label}</p>
-              <p className={`text-4xl font-bold ${s.color}`}>{s.value}</p>
-            </div>
-          ))}
+          <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+            <p className="text-gray-400 text-sm mb-1">{t("totalStudents")}</p>
+            <p className="text-4xl font-bold text-blue-400">
+              {new Set(orders.map((o: any) => o.user?.id)).size}
+            </p>
+          </div>
+          <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+            <p className="text-gray-400 text-sm mb-1">{t("totalCourses")}</p>
+            <p className="text-4xl font-bold text-green-400">{courses.length}</p>
+          </div>
+          <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+            <p className="text-gray-400 text-sm mb-1">{t("totalOrders")}</p>
+            <p className="text-4xl font-bold text-purple-400">{orders.length}</p>
+          </div>
+          <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+            <p className="text-gray-400 text-sm mb-1">{t("totalRevenue")}</p>
+            <p className="text-4xl font-bold text-yellow-400">${totalRevenue}</p>
+          </div>
         </div>
 
+        {/* Quick Actions */}
         <h2 className="text-2xl font-bold mb-6">{t("quickActions")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Link href="/admin/courses/new" className="bg-[#111827] border border-white/10 rounded-2xl p-6 flex items-center gap-4 hover:border-blue-500/50 transition-all">
-            <div className="text-4xl">➕</div><div><h3 className="font-bold">{t("addCourse")}</h3><p className="text-gray-400 text-sm">{t("addCourseDesc")}</p></div>
+            <div className="text-4xl">➕</div>
+            <div>
+              <h3 className="font-bold">{t("addCourse")}</h3>
+              <p className="text-gray-400 text-sm">{t("addCourseDesc")}</p>
+            </div>
           </Link>
           <Link href="/admin/comments" className="bg-[#111827] border border-white/10 rounded-2xl p-6 flex items-center gap-4 hover:border-blue-500/50 transition-all">
-            <div className="text-4xl">💬</div><div><h3 className="font-bold">{t("viewComments")}</h3><p className="text-gray-400 text-sm">{t("viewCommentsDesc")}</p></div>
+            <div className="text-4xl">💬</div>
+            <div>
+              <h3 className="font-bold">{t("viewComments")}</h3>
+              <p className="text-gray-400 text-sm">{t("viewCommentsDesc")}</p>
+            </div>
           </Link>
           <Link href="/admin/orders" className="bg-[#111827] border border-white/10 rounded-2xl p-6 flex items-center gap-4 hover:border-blue-500/50 transition-all">
-            <div className="text-4xl">💳</div><div><h3 className="font-bold">{t("viewOrders")}</h3><p className="text-gray-400 text-sm">{t("viewOrdersDesc")}</p></div>
+            <div className="text-4xl">💳</div>
+            <div>
+              <h3 className="font-bold">{t("viewOrders")}</h3>
+              <p className="text-gray-400 text-sm">{t("viewOrdersDesc")}</p>
+            </div>
           </Link>
         </div>
 
+        <ResetDevice />
+
+        {/* Courses */}
         <h2 className="text-2xl font-bold mb-6">{t("coursesTable")}</h2>
-        <div className="bg-[#111827] border border-white/10 rounded-2xl overflow-hidden">
+
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-[#111827] border border-white/10 rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">
@@ -127,9 +220,40 @@ export default function Admin() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden flex flex-col gap-4">
+          {loading && <p className="text-center text-gray-400">{tc("loading")}</p>}
+          {!loading && courses.length === 0 && <p className="text-center text-gray-400">{t("noCourses")}</p>}
+          {courses.map((course) => (
+            <div key={course.id} className="bg-[#111827] border border-white/10 rounded-2xl p-5">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="font-bold text-sm flex-1">{course.title}</h3>
+                {course.comingSoon
+                  ? <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs ml-2">{t("statusComingSoon")}</span>
+                  : <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs ml-2">{t("statusActive")}</span>}
+              </div>
+              <div className="flex gap-4 text-sm text-gray-400 mb-4">
+                <span>${course.price}</span>
+                <span>{course.level}</span>
+              </div>
+              <div className="flex gap-3">
+                <Link href={`/admin/courses/${course.id}`} className="flex-1 text-center bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-xl text-sm">
+                  {t("manage")}
+                </Link>
+                <button onClick={() => deleteCourse(course.id)} className="flex-1 bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-xl text-sm">
+                  {tc("delete")}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </div>
 
-      <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm mt-12">{tf("copy")}</footer>
+      <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm mt-12">
+        {tf("copy")}
+      </footer>
     </main>
   )
 }
