@@ -69,3 +69,25 @@ body {
   border-right: 3px solid #60a5fa;
   animation: typewriter 2s steps(20) forwards, blink 0.7s step-end infinite;
 }
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] p,
+html[dir="rtl"] span,
+html[dir="rtl"] a,
+html[dir="rtl"] button {
+  line-height: 1.7;
+  letter-spacing: normal !important;
+}
+
+html[dir="rtl"] .tracking-\[0\.3em\] {
+  letter-spacing: normal !important;
+}
