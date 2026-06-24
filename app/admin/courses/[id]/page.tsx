@@ -14,6 +14,7 @@ type Lesson = {
   pdfUrl?: string
   thumbnailUrl?:string
   chapterId?: string
+  files?: any[]
 }
 
 type Chapter = {
@@ -248,6 +249,7 @@ export default function ManageCourse() {
     preview: "",
   })
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null)
+  const [uploadingFile, setUploadingFile] = useState<string | null>(null)
 
   useEffect(() => {
     if (!courseId) return
@@ -478,6 +480,39 @@ export default function ManageCourse() {
     setUploadingThumbnail(null)
   }
 }
+const uploadLessonFile = async (lessonId: string, file: File) => {
+  setUploadingFile(lessonId)
+  try {
+    const token = localStorage.getItem("token")
+    const formData = new FormData()
+    formData.append("file", file)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/pdf/${courseId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+    const data = await res.json()
+    if (data.url) {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}/files`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ fileUrl: data.url, fileName: file.name, fileType: file.type }),
+      })
+      fetchCourse()
+    }
+  } finally {
+    setUploadingFile(null)
+  }
+}
+
+const deleteLessonFile = async (fileId: string, lessonId: string) => {
+  const token = localStorage.getItem("token")
+  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/files/${fileId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  fetchCourse()
+}
 
  const grantAccess = async (userId?: string) => {
   const id = userId || grantForm.userId
@@ -609,6 +644,33 @@ export default function ManageCourse() {
   <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-green-500 px-3 py-1 rounded-lg text-xs transition-colors">
     {uploadingThumbnail === lesson.id ? "Uploading..." : "🖼️ Thumbnail"}
     <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadThumbnail(lesson.id, f) }} />
+  </label>
+</div>
+    {/* Multiple Files */}
+<div className="mt-3 pt-3 border-t border-white/5">
+  <p className="text-xs text-gray-400 mb-2">📎 Additional Files</p>
+  <div className="flex flex-col gap-2 mb-2">
+    {(lesson.files || []).map((file: any) => (
+      <div key={file.id} className="flex items-center justify-between bg-[#111827] rounded-lg px-3 py-2">
+        <a href={file.fileUrl} target="_blank" className="text-blue-400 text-xs truncate flex-1 hover:underline">
+          📄 {file.fileName}
+        </a>
+        <button
+          onClick={() => deleteLessonFile(file.id, lesson.id)}
+          className="text-red-400 text-xs ml-2"
+        >
+          🗑️
+        </button>
+      </div>
+    ))}
+  </div>
+  <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-yellow-500 px-3 py-1 rounded-lg text-xs transition-colors inline-block">
+    {uploadingFile === lesson.id ? "Uploading..." : "➕ Add File"}
+    <input
+      type="file"
+      className="hidden"
+      onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLessonFile(lesson.id, f) }}
+    />
   </label>
 </div>
     </div>

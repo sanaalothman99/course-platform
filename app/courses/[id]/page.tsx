@@ -15,6 +15,7 @@ type Lesson = {
   pdfUrl?: string
   thumbnailUrl?:string
   chapterId?: string
+  files?: any[]
 }
 
 type Chapter = {
@@ -664,12 +665,20 @@ if (enrolled && course.hasLevels) {
                 )}
               </div>
 
-              {activeLesson.description && (
-                <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
-                  <h3 className="font-bold mb-2">📝 About this lesson</h3>
-                  <p className="text-gray-400">{activeLesson.description}</p>
-                </div>
-              )}
+             {activeLesson.description && (
+  <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
+    <h3 className="font-bold mb-2">📝 About this lesson</h3>
+    <p className="text-gray-400 whitespace-pre-wrap">
+      {activeLesson.description.split(/(\bhttps?:\/\/\S+)/g).map((part, i) =>
+        part.match(/^https?:\/\//) ? (
+          <a key={i} href={part} target="_blank" className="text-blue-400 hover:underline">{part}</a>
+        ) : (
+          part
+        )
+      )}
+    </p>
+  </div>
+)}
 
                  {activeLesson.pdfUrl && (
   <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
@@ -683,6 +692,25 @@ if (enrolled && course.hasLevels) {
     </a>
   </div>
 )}
+{activeLesson.files && activeLesson.files.length > 0 && (
+  <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
+    <h3 className="font-bold mb-4">📎 Additional Files</h3>
+    <div className="flex flex-col gap-2">
+      {activeLesson.files.map((file: any) => (
+        <a
+          key={file.id}
+          href={file.fileUrl}
+          target="_blank"
+          className="flex items-center gap-2 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 hover:border-blue-500/50 transition-colors"
+        >
+          <span>📄</span>
+          <span className="text-sm text-blue-400 truncate">{file.fileName}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
               {/* Comments */}
               <div className="max-w-4xl">
                 <h3 className="font-bold text-lg mb-4">💬 Comments</h3>
