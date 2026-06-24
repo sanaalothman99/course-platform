@@ -698,11 +698,12 @@ if (enrolled && course.hasLevels) {
     <div className="flex flex-col gap-2">
       {activeLesson.files.map((file: any) => {
         const isPdf = file.fileType === 'application/pdf' || file.fileName?.toLowerCase().endsWith('.pdf')
+        const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/upload/download?url=${encodeURIComponent(file.fileUrl)}&filename=${encodeURIComponent(file.fileName)}`
         return (
           <a
             key={file.id}
-            href={file.fileUrl}
-            {...(isPdf ? { target: "_blank" } : { download: file.fileName })}
+            href={isPdf ? file.fileUrl : downloadUrl}
+            {...(isPdf ? { target: "_blank" } : {})}
             className="flex items-center gap-2 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 hover:border-blue-500/50 transition-colors"
           >
             <span>{isPdf ? "📄" : "📥"}</span>
