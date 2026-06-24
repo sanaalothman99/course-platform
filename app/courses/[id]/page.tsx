@@ -696,17 +696,20 @@ if (enrolled && course.hasLevels) {
   <div className="max-w-4xl bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
     <h3 className="font-bold mb-4">📎 Additional Files</h3>
     <div className="flex flex-col gap-2">
-      {activeLesson.files.map((file: any) => (
-        <a
-          key={file.id}
-          href={file.fileUrl}
-          target="_blank"
-          className="flex items-center gap-2 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 hover:border-blue-500/50 transition-colors"
-        >
-          <span>📄</span>
-          <span className="text-sm text-blue-400 truncate">{file.fileName}</span>
-        </a>
-      ))}
+      {activeLesson.files.map((file: any) => {
+        const isPdf = file.fileType === 'application/pdf' || file.fileName?.toLowerCase().endsWith('.pdf')
+        return (
+          <a
+            key={file.id}
+            href={file.fileUrl}
+            {...(isPdf ? { target: "_blank" } : { download: file.fileName })}
+            className="flex items-center gap-2 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 hover:border-blue-500/50 transition-colors"
+          >
+            <span>{isPdf ? "📄" : "📥"}</span>
+            <span className="text-sm text-blue-400 truncate">{file.fileName}</span>
+          </a>
+        )
+      })}
     </div>
   </div>
 )}
