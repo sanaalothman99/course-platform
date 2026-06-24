@@ -435,7 +435,7 @@ export default function ManageCourse() {
       const token = localStorage.getItem("token")
       const formData = new FormData()
       formData.append("file", file)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/pdf/${courseId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/file/${courseId}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
