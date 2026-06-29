@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { Link, useRouter } from "@/i18n/navigation"
 import Navbar from "../components/Navbar"
 
@@ -8,6 +8,7 @@ type Course = {
   id: string
   title: string
   description: string
+  titleAr?: string
   level: string
   thumbnail?: string
   lessons: { id: string }[]
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [certificates, setCertificates] = useState<any[]>([])
   const t = useTranslations("dashboard")
+  const locale = useLocale()
 
   useEffect(() => {
     const userData = localStorage.getItem("user")
@@ -173,7 +175,7 @@ export default function Dashboard() {
                 <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">
                   {order.course.level}
                 </span>
-                <h3 className="font-bold mt-3 mb-1">{order.course.title}</h3>
+                <h3 className="font-bold mt-3 mb-1">{locale === "ar" && order.course.titleAr ? order.course.titleAr : order.course.title}</h3>
                 <p className="text-gray-400 text-sm mb-4">
                   {t("lessonsCount", { count: order.course.lessons?.length || 0 })}
                 </p>

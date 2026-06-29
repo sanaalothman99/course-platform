@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import Navbar from "./components/Navbar"
 import ScrollToTop from "./components/ScrollToTop"
@@ -10,6 +10,8 @@ type Course = {
   id: string
   title: string
   description: string
+  titleAr?: string
+  descriptionAr?: string
   price: number
   level: string
   thumbnail?: string
@@ -27,6 +29,7 @@ export default function Home() {
   const [currentImg, setCurrentImg] = useState(0)
   const t = useTranslations("home")
   const tf = useTranslations("footer")
+  const locale = useLocale()
 
   const faqs = [
     { q: t("faq1Q"), a: t("faq1A") },
@@ -173,8 +176,8 @@ export default function Home() {
                     {course.comingSoon && <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-3 py-1 rounded-full">{t("comingSoon")}</span>}
                   </div>
 
-                  <h3 className="text-2xl font-black mb-3 group-hover:text-blue-400 transition-colors">{course.title}</h3>
-                  <p className="text-gray-400 text-sm leading-6 mb-6 line-clamp-2">{course.description}</p>
+                  <h3 className="text-2xl font-black mb-3 group-hover:text-blue-400 transition-colors">{locale === "ar" && course.titleAr ? course.titleAr : course.title}</h3>
+                  <p className="text-gray-400 text-sm leading-6 mb-6 line-clamp-2">{locale === "ar" && course.descriptionAr ? course.descriptionAr : course.description}</p>
 
                   <div className="text-sm text-gray-500 mb-6">
                     📖 {course.hasLevels ? t("levels", { count: course.children?.length || 0 }) : t("lessons", { count: course.lessons?.length || 0 })}

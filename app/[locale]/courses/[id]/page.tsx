@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { useRouter, Link } from "@/i18n/navigation"
 import Navbar from "../../components/Navbar"
 
@@ -30,6 +30,8 @@ type Course = {
   id: string
   title: string
   description: string
+  titleAr?: string
+  descriptionAr?: string
   price: number
   level: string
   thumbnail?: string
@@ -44,6 +46,7 @@ function SubCourses({ courseId }: { courseId: string }) {
   const router = useRouter()
   const [subCourses, setSubCourses] = useState<any[]>([])
   const t = useTranslations("coursePage")
+  const locale = useLocale()
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/sub-courses`)
@@ -71,8 +74,8 @@ function SubCourses({ courseId }: { courseId: string }) {
 </div>
           <div className="p-6">
             <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">{sub.level}</span>
-            <h3 className="font-bold text-lg mt-3 mb-2">{sub.title}</h3>
-            <p className="text-gray-400 text-sm mb-4">{sub.description}</p>
+            <h3 className="font-bold text-lg mt-3 mb-2">{locale === "ar" && sub.titleAr ? sub.titleAr : sub.title}</h3>
+            <p className="text-gray-400 text-sm mb-4">{locale === "ar" && sub.descriptionAr ? sub.descriptionAr : sub.description}</p>
             <div className="flex justify-between items-center">
               <span className="text-xl font-bold">${sub.price}</span>
               <span className="text-blue-400 text-sm">{t("viewLevel")}</span>
@@ -90,6 +93,7 @@ export default function CoursePage() {
   const courseId = params?.id as string
   const t = useTranslations("coursePage")
   const tf = useTranslations("footer")
+  const locale = useLocale()
 
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
@@ -258,6 +262,8 @@ export default function CoursePage() {
   const totalLessons = getAllLessons().length
   const completedCount = completed.size
   const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
+  const displayTitle = (locale === "ar" && course?.titleAr ? course.titleAr : course?.title) || ""
+  const displayDescription = (locale === "ar" && course?.descriptionAr ? course.descriptionAr : course?.description) || ""
 
   if (loading) {
     return (
@@ -290,8 +296,8 @@ if (course.comingSoon) {
             <span className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 rounded-full">
               {t("comingSoon")}
             </span>
-            <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
-            <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
+            <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{displayTitle}</h1>
+            <p className="text-gray-400 leading-7 mb-6">{displayDescription}</p>
             <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-4">
               <p className="text-yellow-400 font-semibold text-sm">{t("underDevelopment")}</p>
               <p className="text-gray-400 text-xs mt-1">{t("stayTuned")}</p>
@@ -299,7 +305,7 @@ if (course.comingSoon) {
           </div>
           <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
             {course.thumbnail ? (
-              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
+              <img src={course.thumbnail} alt={displayTitle} className="w-full h-full object-contain p-4" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-yellow-600/30 to-blue-800 flex items-center justify-center text-7xl">🔜</div>
             )}
@@ -332,12 +338,12 @@ if (enrolled && course.hasLevels) {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
             <div>
-              <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-              <p className="text-gray-400 mb-6">{course.description}</p>
+              <h1 className="text-4xl font-bold mb-4">{displayTitle}</h1>
+              <p className="text-gray-400 mb-6">{displayDescription}</p>
             </div>
             {course.thumbnail && (
               <div className="h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
-                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain" />
+                <img src={course.thumbnail} alt={displayTitle} className="w-full h-full object-contain" />
               </div>
             )}
           </div>
@@ -366,8 +372,8 @@ if (enrolled && course.hasLevels) {
               <span className="text-xs text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">
                 {course.level}
               </span>
-              <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{course.title}</h1>
-              <p className="text-gray-400 leading-7 mb-6">{course.description}</p>
+              <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-4">{displayTitle}</h1>
+              <p className="text-gray-400 leading-7 mb-6">{displayDescription}</p>
               <div className="flex gap-6 text-sm text-gray-400 mb-8">
                 {course.hasLevels ? (
                   <span>{t("multipleLevels")}</span>
@@ -395,7 +401,7 @@ if (enrolled && course.hasLevels) {
 
    <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden border border-white/10">
   {course.thumbnail ? (
-    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-contain p-4" />
+    <img src={course.thumbnail} alt={displayTitle} className="w-full h-full object-contain p-4" />
   ) : (
     <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-7xl">🎓</div>
   )}
@@ -497,7 +503,7 @@ if (enrolled && course.hasLevels) {
             <Link href="/courses" className="text-white/70 text-sm hover:text-white mb-3 inline-block">
               {t("backToCourses")}
             </Link>
-            <h2 className="text-base md:text-lg font-bold">{course.title}</h2>
+            <h2 className="text-base md:text-lg font-bold">{displayTitle}</h2>
             <div className="mt-3">
               <div className="flex justify-between text-sm text-white/70 mb-1">
                 <span>{t("progress")}</span>
@@ -611,7 +617,7 @@ if (enrolled && course.hasLevels) {
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {activeTab === "preview" && !activeLesson && (
             <div>
-              <h1 className="text-xl md:text-2xl font-bold mb-6">{t("previewLabel", { title: course.title })}</h1>
+              <h1 className="text-xl md:text-2xl font-bold mb-6">{t("previewLabel", { title: displayTitle })}</h1>
               {course.previewUrl ? (
                 <video src={course.previewUrl} controls controlsList="nodownload" className="w-full max-w-4xl rounded-2xl mb-6 aspect-video" />
               ) : (

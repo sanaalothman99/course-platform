@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import Navbar from "../components/Navbar"
 
@@ -8,6 +8,8 @@ type Course = {
   id: string
   title: string
   description: string
+  titleAr?: string
+  descriptionAr?: string
   price: number
   level: string
   thumbnail?: string
@@ -20,6 +22,7 @@ export default function Courses() {
   const [loading, setLoading] = useState(true)
   const t = useTranslations("coursesPage")
   const tf = useTranslations("footer")
+  const locale = useLocale()
 
   useEffect(() => {
     fetchCourses()
@@ -81,10 +84,10 @@ const fetchCourses = async () => {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{locale === "ar" && course.titleAr ? course.titleAr : course.title}</h3>
 
                   <p className="text-gray-400 text-sm leading-6 mb-4 line-clamp-2">
-                    {course.description}
+                    {locale === "ar" && course.descriptionAr ? course.descriptionAr : course.description}
                   </p>
 
                   <div className="flex gap-4 text-sm text-gray-400 mb-6">

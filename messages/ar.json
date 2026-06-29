@@ -176,7 +176,13 @@
     "creating": "جاري الإنشاء...",
     "createCourse": "← إنشاء الدورة",
     "errorCreating": "خطأ في إنشاء الدورة",
-    "error": "خطأ"
+    "error": "خطأ",
+    "titleAr": "عنوان الدورة (عربي)",
+    "titleArPlaceholder": "مثال: دورة PLC الأساسية",
+    "descriptionAr": "الوصف (عربي)",
+    "descArPlaceholder": "وصف الدورة بالعربي...",
+    "translateAuto": "🌐 ترجم تلقائياً",
+    "translating": "جاري الترجمة..."
   },
   "manageCourse": {
     "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني...",
@@ -195,7 +201,11 @@
     "activeToggle": "✅ نشطة — اضغط لجعلها قريباً",
     "editCourseInfo": "✏️ تعديل معلومات الدورة",
     "titleLabel": "العنوان",
+    "titleArLabel": "العنوان (عربي)",
     "descriptionLabel": "الوصف",
+    "descriptionArLabel": "الوصف (عربي)",
+    "translateAuto": "🌐 ترجم تلقائياً",
+    "translating": "جاري الترجمة...",
     "thumbnailLabel": "صورة الدورة (تظهر في قائمة الدورات)",
     "saveChanges": "💾 حفظ التغييرات",
     "courseUpdated": "تم تحديث الدورة!",

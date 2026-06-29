@@ -8,16 +8,38 @@ export default function NewCourse() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [translating, setTranslating] = useState<"title" | "description" | null>(null)
   const t = useTranslations("newCourse")
   const [form, setForm] = useState({
     title: "",
     description: "",
+    titleAr: "",
+    descriptionAr: "",
     price: "",
     level: "",
     hasLevels: false,
     comingSoon: false,
     image: null as File | null,
   })
+
+  const translateField = async (field: "title" | "description") => {
+    const text = field === "title" ? form.title : form.description
+    if (!text) return
+    setTranslating(field)
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      })
+      const data = await res.json()
+      if (field === "title") setForm((f) => ({ ...f, titleAr: data.translated }))
+      else setForm((f) => ({ ...f, descriptionAr: data.translated }))
+    } finally {
+      setTranslating(null)
+    }
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -54,6 +76,8 @@ export default function NewCourse() {
         body: JSON.stringify({
           title: form.title,
           description: form.description,
+          titleAr: form.titleAr,
+          descriptionAr: form.descriptionAr,
           price: parseFloat(form.price),
           level: form.level,
           hasLevels: form.hasLevels,
@@ -101,6 +125,29 @@ export default function NewCourse() {
             />
           </div>
 
+          {/* Title Arabic */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm text-gray-400 block">{t("titleAr")}</label>
+              <button
+                type="button"
+                onClick={() => translateField("title")}
+                disabled={!form.title || translating === "title"}
+                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+              >
+                {translating === "title" ? t("translating") : t("translateAuto")}
+              </button>
+            </div>
+            <input
+              type="text"
+              dir="rtl"
+              placeholder={t("titleArPlaceholder")}
+              value={form.titleAr}
+              onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
+              className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+
           {/* Description */}
           <div>
             <label className="text-sm text-gray-400 mb-2 block">{t("description")}</label>
@@ -109,6 +156,29 @@ export default function NewCourse() {
               placeholder={t("descPlaceholder")}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+            />
+          </div>
+
+          {/* Description Arabic */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm text-gray-400 block">{t("descriptionAr")}</label>
+              <button
+                type="button"
+                onClick={() => translateField("description")}
+                disabled={!form.description || translating === "description"}
+                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+              >
+                {translating === "description" ? t("translating") : t("translateAuto")}
+              </button>
+            </div>
+            <textarea
+              rows={4}
+              dir="rtl"
+              placeholder={t("descArPlaceholder")}
+              value={form.descriptionAr}
+              onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
               className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />
           </div>

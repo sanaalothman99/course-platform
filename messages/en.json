@@ -176,7 +176,13 @@
     "creating": "Creating...",
     "createCourse": "Create Course →",
     "errorCreating": "Error creating course",
-    "error": "Error"
+    "error": "Error",
+    "titleAr": "Course Title (Arabic)",
+    "titleArPlaceholder": "e.g. دورة PLC الأساسية",
+    "descriptionAr": "Description (Arabic)",
+    "descArPlaceholder": "وصف الدورة بالعربي...",
+    "translateAuto": "🌐 Auto-translate",
+    "translating": "Translating..."
   },
   "manageCourse": {
     "searchPlaceholder": "Search by name or email...",
@@ -195,7 +201,11 @@
     "activeToggle": "✅ Active — Click to set Coming Soon",
     "editCourseInfo": "✏️ Edit Course Info",
     "titleLabel": "Title",
+    "titleArLabel": "Title (Arabic)",
     "descriptionLabel": "Description",
+    "descriptionArLabel": "Description (Arabic)",
+    "translateAuto": "🌐 Auto-translate",
+    "translating": "Translating...",
     "thumbnailLabel": "Course Thumbnail (shown in courses list)",
     "saveChanges": "💾 Save Changes",
     "courseUpdated": "Course updated!",

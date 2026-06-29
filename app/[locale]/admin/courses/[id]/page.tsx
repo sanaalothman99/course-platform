@@ -255,6 +255,28 @@ export default function ManageCourse() {
   })
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null)
   const [uploadingFile, setUploadingFile] = useState<string | null>(null)
+  const [translatingField, setTranslatingField] = useState<"title" | "description" | null>(null)
+
+  const translateCourseField = async (field: "title" | "description") => {
+    const sourceId = field === "title" ? "edit-title" : "edit-description"
+    const targetId = field === "title" ? "edit-title-ar" : "edit-description-ar"
+    const text = (document.getElementById(sourceId) as HTMLInputElement | HTMLTextAreaElement)?.value
+    if (!text) return
+    setTranslatingField(field)
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      })
+      const data = await res.json()
+      const target = document.getElementById(targetId) as HTMLInputElement | HTMLTextAreaElement
+      if (target) target.value = data.translated
+    } finally {
+      setTranslatingField(null)
+    }
+  }
 
   useEffect(() => {
     if (!courseId) return
@@ -731,11 +753,51 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
       />
     </div>
     <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm text-gray-400 block">{t("titleArLabel")}</label>
+        <button
+          type="button"
+          onClick={() => translateCourseField("title")}
+          disabled={translatingField === "title"}
+          className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+        >
+          {translatingField === "title" ? t("translating") : t("translateAuto")}
+        </button>
+      </div>
+      <input
+        type="text"
+        dir="rtl"
+        defaultValue={course?.titleAr}
+        id="edit-title-ar"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+      />
+    </div>
+    <div>
       <label className="text-sm text-gray-400 mb-2 block">{t("descriptionLabel")}</label>
       <textarea
         rows={4}
         defaultValue={course?.description}
         id="edit-description"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 resize-none"
+      />
+    </div>
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm text-gray-400 block">{t("descriptionArLabel")}</label>
+        <button
+          type="button"
+          onClick={() => translateCourseField("description")}
+          disabled={translatingField === "description"}
+          className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+        >
+          {translatingField === "description" ? t("translating") : t("translateAuto")}
+        </button>
+      </div>
+      <textarea
+        rows={4}
+        dir="rtl"
+        defaultValue={course?.descriptionAr}
+        id="edit-description-ar"
         className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 resize-none"
       />
     </div>
@@ -757,6 +819,8 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
         const token = localStorage.getItem("token")
         const title = (document.getElementById("edit-title") as HTMLInputElement)?.value
         const description = (document.getElementById("edit-description") as HTMLTextAreaElement)?.value
+        const titleAr = (document.getElementById("edit-title-ar") as HTMLInputElement)?.value
+        const descriptionAr = (document.getElementById("edit-description-ar") as HTMLTextAreaElement)?.value
         const imageFile = (document.getElementById("edit-image") as HTMLInputElement)?.files?.[0]
 
 
@@ -780,7 +844,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ title, description, thumbnail, bannerImage }),
+          body: JSON.stringify({ title, description, titleAr, descriptionAr, thumbnail, bannerImage }),
         })
         fetchCourse()
         alert(t("courseUpdated"))
