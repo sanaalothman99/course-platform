@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -37,10 +36,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
 
-        <Script
-          src="//cdn.conveythis.com/javascript/conveythis.js?api_key=pub_81392e1473f796f6e6cb7081d6fa534a" 
-          strategy="afterInteractive"
-        />
+       
       </body>
     </html>
   );
