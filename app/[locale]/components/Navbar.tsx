@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { useRouter } from "next/navigation"
 import { Link, usePathname } from "@/i18n/navigation"
 
@@ -10,6 +10,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const locale = useLocale()
   const t = useTranslations("nav")
 
   useEffect(() => {
@@ -77,6 +78,14 @@ export default function Navbar() {
 
             <div className="w-px h-5 bg-white/10 mx-2" />
 
+            <Link
+              href={pathname}
+              locale={locale === "en" ? "ar" : "en"}
+              className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/30 text-gray-300 hover:text-white px-3 py-2 rounded-full text-sm font-medium transition-all duration-300"
+            >
+              🌐 {locale === "en" ? "عربي" : "EN"}
+            </Link>
+
             {user ? (
               <div className="flex items-center gap-3">
                 <Link
@@ -136,6 +145,15 @@ export default function Navbar() {
 
 
             <div className="h-px bg-white/5 my-2" />
+
+            <Link
+              href={pathname}
+              locale={locale === "en" ? "ar" : "en"}
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              🌐 {locale === "en" ? "عربي" : "EN"}
+            </Link>
 
             {user ? (
               <>
