@@ -49,10 +49,10 @@ export default function Navbar() {
  <Link href="/">
   <div className="flex flex-col">
     <span className="text-2xl font-black text-white typewriter">
-      A to Z Automation
+      {t("brandName")}
     </span>
     <span className="text-xs tracking-[0.3em] text-blue-400 font-medium">
-      PROFESSIONAL PLC TRAINING
+      {t("brandTagline")}
     </span>
   </div>
 </Link>
