@@ -10,6 +10,7 @@ import Navbar from "../../components/Navbar"
 type Lesson = {
   id: string
   title: string
+  titleAr?: string
   position: number
   videoUrl?: string
   description?: string
@@ -437,7 +438,7 @@ if (enrolled && course.hasLevels) {
                       {chapter.lessons.map((lesson, i) => (
                         <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
                           <span className="text-gray-500 text-sm w-6">{i + 1}</span>
-                          <span className="flex-1 text-sm text-gray-300">{lesson.title}</span>
+                          <span className="flex-1 text-sm text-gray-300">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
                           <span className="text-gray-600 text-sm">🔒</span>
                         </div>
                       ))}
@@ -447,7 +448,7 @@ if (enrolled && course.hasLevels) {
                   course.lessons.map((lesson, i) => (
                     <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-4 md:px-6 py-4 flex items-center gap-4">
                       <span className="text-blue-400 font-bold w-8">{i + 1}</span>
-                      <span className="flex-1 text-sm">{lesson.title}</span>
+                      <span className="flex-1 text-sm">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
                       <span className="text-gray-600 text-sm">🔒</span>
                     </div>
                   ))
@@ -558,7 +559,7 @@ if (enrolled && course.hasLevels) {
                         >
                           {completed.has(lesson.id) && <span className="text-white text-xs">✓</span>}
                         </button>
-                        <p className="text-sm truncate">{lesson.title}</p>
+                        <p className="text-sm truncate">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</p>
                       </div>
                     ))}
                 </div>
@@ -576,7 +577,7 @@ if (enrolled && course.hasLevels) {
                   >
                     {completed.has(lesson.id) && <span className="text-white text-xs">✓</span>}
                   </button>
-                  <p className="text-sm truncate">{lesson.title}</p>
+                  <p className="text-sm truncate">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</p>
                 </div>
               ))
             )}
@@ -634,7 +635,7 @@ if (enrolled && course.hasLevels) {
           {activeLesson && (
             <div>
               <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-                <h1 className="text-xl md:text-2xl font-bold">{activeLesson.title}</h1>
+                <h1 className="text-xl md:text-2xl font-bold">{locale === "ar" && activeLesson.titleAr ? activeLesson.titleAr : activeLesson.title}</h1>
                 <button
                   onClick={() => toggleCompleted(activeLesson.id)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${completed.has(activeLesson.id) ? "bg-green-600 hover:bg-green-500" : "bg-white/10 hover:bg-white/20"}`}
@@ -649,7 +650,7 @@ if (enrolled && course.hasLevels) {
     {activeLesson.thumbnailUrl && (
       <img
         src={activeLesson.thumbnailUrl}
-        alt={activeLesson.title}
+        alt={locale === "ar" && activeLesson.titleAr ? activeLesson.titleAr : activeLesson.title}
         className="absolute inset-0 w-full h-full object-cover z-10 cursor-pointer"
         onClick={(e) => {
           (e.target as HTMLElement).style.display = 'none'

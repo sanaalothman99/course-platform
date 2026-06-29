@@ -10,6 +10,7 @@ import React from "react"
 type Lesson = {
   id: string
   title: string
+  titleAr?: string
   position: number
   videoUrl?: string
   description?: string
@@ -236,7 +237,8 @@ export default function ManageCourse() {
   const [editingChapter, setEditingChapter] = useState<string | null>(null)
   const [newLesson, setNewLesson] = useState({ title: "", position: 1 })
   const [newChapter, setNewChapter] = useState({ title: "", position: 1 })
-  const [editForm, setEditForm] = useState({ title: "", description: "" })
+  const [editForm, setEditForm] = useState({ title: "", titleAr: "", description: "" })
+  const [translatingLessonTitle, setTranslatingLessonTitle] = useState(false)
   const [editChapterTitle, setEditChapterTitle] = useState("")
   const [addingLessonToChapter, setAddingLessonToChapter] = useState<string | null>(null)
   const [chapterLesson, setChapterLesson] = useState({ title: "", position: 1 })
@@ -401,6 +403,23 @@ export default function ManageCourse() {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const translateLessonTitle = async () => {
+    if (!editForm.title) return
+    setTranslatingLessonTitle(true)
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: editForm.title }),
+      })
+      const data = await res.json()
+      setEditForm((f) => ({ ...f, titleAr: data.translated }))
+    } finally {
+      setTranslatingLessonTitle(false)
     }
   }
 
@@ -616,7 +635,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
           <button
             onClick={() => {
               setEditingLesson(lesson.id)
-              setEditForm({ title: lesson.title, description: lesson.description || "" })
+              setEditForm({ title: lesson.title, titleAr: lesson.titleAr || "", description: lesson.description || "" })
             }}
             className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 border border-blue-400/30 rounded-lg"
           >
@@ -637,6 +656,25 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
             type="text"
             value={editForm.title}
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+            className="w-full bg-[#0a0f1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+            placeholder={t("lessonTitlePlaceholder")}
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">{t("titleArLabel")}</span>
+            <button
+              type="button"
+              onClick={translateLessonTitle}
+              disabled={!editForm.title || translatingLessonTitle}
+              className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+            >
+              {translatingLessonTitle ? t("translating") : t("translateAuto")}
+            </button>
+          </div>
+          <input
+            type="text"
+            dir="rtl"
+            value={editForm.titleAr}
+            onChange={(e) => setEditForm({ ...editForm, titleAr: e.target.value })}
             className="w-full bg-[#0a0f1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
             placeholder={t("lessonTitlePlaceholder")}
           />
