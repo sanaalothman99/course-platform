@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, Link } from "@/i18n/navigation"
@@ -109,6 +109,8 @@ export default function CoursePage() {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(320)
+  const [showThumbnail, setShowThumbnail] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     if (!courseId) return
@@ -116,6 +118,10 @@ export default function CoursePage() {
     checkEnrollment()
     fetchProgress()
   }, [courseId])
+
+  useEffect(() => {
+    setShowThumbnail(true)
+  }, [activeLesson?.id])
 
   const fetchCourse = async () => {
     try {
@@ -647,19 +653,20 @@ if (enrolled && course.hasLevels) {
               <div className="aspect-video w-full max-w-4xl rounded-2xl overflow-hidden mb-8 bg-[#111827] border border-white/10">
                {activeLesson.videoUrl ? (
   <div className="relative w-full h-full">
-    {activeLesson.thumbnailUrl && (
+    {activeLesson.thumbnailUrl && showThumbnail && (
       <img
         src={activeLesson.thumbnailUrl}
         alt={locale === "ar" && activeLesson.titleAr ? activeLesson.titleAr : activeLesson.title}
         className="absolute inset-0 w-full h-full object-cover z-10 cursor-pointer"
-        onClick={(e) => {
-          (e.target as HTMLElement).style.display = 'none'
-          const video = (e.target as HTMLElement).nextElementSibling as HTMLVideoElement
-          video?.play()
+        onClick={() => {
+          setShowThumbnail(false)
+          videoRef.current?.play()
         }}
       />
     )}
     <video
+      ref={videoRef}
+      key={activeLesson.id}
       src={activeLesson.videoUrl}
       controls
       controlsList="nodownload"
