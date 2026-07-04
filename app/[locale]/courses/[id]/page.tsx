@@ -550,30 +550,69 @@ if (enrolled && course.hasLevels) {
                     onClick={() => toggleChapter(chapter.id)}
                     className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 hover:bg-white/5 transition-colors"
                   >
-                    <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶"}</span>
+                    <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶️"}</span>
                     <div className="flex-1">
                       <p className="text-sm font-bold">{chapter.title}</p>
                       <p className="text-xs text-gray-400">{t("lessonsWord", { count: chapter.lessons.length })}</p>
                     </div>
                   </div>
 
-                  {expandedChapters.has(chapter.id) && chapter.lessons
-                    .sort((a, b) => a.position - b.position)
-                    .map((lesson) => (
-                      <div
-                        key={lesson.id}
-                        onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
-                        className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-8 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
-                      >
-                        <button
-                          onClick={(e) => { e.stopPropagation(); toggleCompleted(lesson.id) }}
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${completed.has(lesson.id) ? "bg-green-500 border-green-500" : "border-gray-500"}`}
-                        >
-                          {completed.has(lesson.id) && <span className="text-white text-xs">✓</span>}
-                        </button>
-                        <p className="text-sm truncate">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</p>
-                      </div>
-                    ))}
+                  {expandedChapters.has(chapter.id) && (
+                    <>
+                      {(chapter as any).children?.length > 0 ? (
+                        (chapter as any).children.map((subChapter: any) => (
+                          <div key={subChapter.id}>
+                            <div
+                              onClick={() => toggleChapter(subChapter.id)}
+                              className="px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-6 hover:bg-white/5 transition-colors"
+                            >
+                              <span className="text-purple-400 text-xs">{expandedChapters.has(subChapter.id) ? "▼" : "▶️"}</span>
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-purple-300">{subChapter.title}</p>
+                                <p className="text-xs text-gray-500">{subChapter.lessons?.length || 0} lessons</p>
+                              </div>
+                            </div>
+
+                            {expandedChapters.has(subChapter.id) && subChapter.lessons
+                              ?.sort((a: any, b: any) => a.position - b.position)
+                              .map((lesson: any) => (
+                                <div
+                                  key={lesson.id}
+                                  onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
+                                  className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-10 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
+                                >
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); toggleCompleted(lesson.id) }}
+                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${completed.has(lesson.id) ? "bg-green-500 border-green-500" : "border-gray-500"}`}
+                                  >
+                                    {completed.has(lesson.id) && <span className="text-white text-xs">✓</span>}
+                                  </button>
+                                  <p className="text-sm truncate">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</p>
+                                </div>
+                              ))}
+                          </div>
+                        ))
+                      ) : (
+                        chapter.lessons
+                          .sort((a, b) => a.position - b.position)
+                          .map((lesson) => (
+                            <div
+                              key={lesson.id}
+                              onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}
+                              className={`px-4 py-3 cursor-pointer border-b border-white/5 flex items-center gap-3 pl-8 transition-colors ${activeLesson?.id === lesson.id ? "bg-blue-600/20 border-l-4 border-l-blue-500" : "hover:bg-white/5"}`}
+                            >
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleCompleted(lesson.id) }}
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${completed.has(lesson.id) ? "bg-green-500 border-green-500" : "border-gray-500"}`}
+                              >
+                                {completed.has(lesson.id) && <span className="text-white text-xs">✓</span>}
+                              </button>
+                              <p className="text-sm truncate">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</p>
+                            </div>
+                          ))
+                      )}
+                    </>
+                  )}
                 </div>
               ))
             ) : (
