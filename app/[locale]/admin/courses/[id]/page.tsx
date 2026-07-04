@@ -508,25 +508,32 @@ export default function ManageCourse() {
     const token = localStorage.getItem("token")
     const formData = new FormData()
     formData.append("file", file)
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
+    const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image/${courseId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     })
-    const data = await res.json()
-    if (data.url) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ thumbnailUrl: data.url }),
-      })
-      // Update local state immediately so preview reflects the new image right away
-      setLessons(prev => prev.map(l => l.id === lessonId ? { ...l, thumbnailUrl: data.url } : l))
-      setChapters(prev => prev.map(ch => ({
-        ...ch,
-        lessons: ch.lessons.map(l => l.id === lessonId ? { ...l, thumbnailUrl: data.url } : l),
-      })))
+    const uploadData = await uploadRes.json()
+    if (!uploadData.url) {
+      alert("فشل رفع الصورة: " + (uploadData.message || uploadRes.status))
+      return
     }
+    const putRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ thumbnailUrl: uploadData.url }),
+    })
+    if (!putRes.ok) {
+      alert("فشل حفظ الصورة: " + putRes.status)
+      return
+    }
+    setLessons(prev => prev.map(l => l.id === lessonId ? { ...l, thumbnailUrl: uploadData.url } : l))
+    setChapters(prev => prev.map(ch => ({
+      ...ch,
+      lessons: ch.lessons.map(l => l.id === lessonId ? { ...l, thumbnailUrl: uploadData.url } : l),
+    })))
+  } catch (err) {
+    alert("خطأ: " + (err as Error).message)
   } finally {
     setUploadingThumbnail(null)
   }
