@@ -258,7 +258,8 @@ export default function ManageCourse() {
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null)
   const [uploadingFile, setUploadingFile] = useState<string | null>(null)
   const [translatingField, setTranslatingField] = useState<"title" | "description" | null>(null)
-
+const [addingSubChapter, setAddingSubChapter] = useState<string | null>(null)
+const [subChapterTitle, setSubChapterTitle] = useState("")
   const translateCourseField = async (field: "title" | "description") => {
     const sourceId = field === "title" ? "edit-title" : "edit-description"
     const targetId = field === "title" ? "edit-title-ar" : "edit-description-ar"
@@ -353,6 +354,30 @@ export default function ManageCourse() {
       setLoading(false)
     }
   }
+  const addSubChapter = async (parentChapterId: string) => {
+  if (!subChapterTitle) return
+  setLoading(true)
+  try {
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/chapters/${parentChapterId}/sub-chapters`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ 
+        title: subChapterTitle, 
+        position: 1,
+        courseId 
+      }),
+    })
+    setSubChapterTitle("")
+    setAddingSubChapter(null)
+    fetchCourse()
+  } finally {
+    setLoading(false)
+  }
+}
 
   const deleteChapter = async (chapterId: string) => {
     if (!confirm(t("deleteChapterConfirm"))) return
@@ -1092,6 +1117,65 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                           ))}
                       </div>
 
+                      {/* Sub-Chapters */}
+                      {(chapter as any).children?.length > 0 && (
+                        <div className="flex flex-col gap-3 mb-4 border-l-2 border-purple-500/30 pl-4 ml-2">
+                          {(chapter as any).children
+                            .sort((a: any, b: any) => a.position - b.position)
+                            .map((sub: any) => (
+                              <div key={sub.id} className="bg-[#0d1426] border border-purple-500/20 rounded-xl p-4">
+                                <div className="flex justify-between items-center mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-purple-400 text-xs">▶</span>
+                                    <h4 className="text-purple-300 font-semibold text-sm">{sub.title}</h4>
+                                  </div>
+                                  <button
+                                    onClick={() => deleteChapter(sub.id)}
+                                    className="text-red-400 text-xs px-2 py-1 border border-red-400/30 rounded-lg"
+                                  >🗑️</button>
+                                </div>
+
+                                <div className="flex flex-col gap-2 mb-3">
+                                  {sub.lessons?.length === 0 && (
+                                    <p className="text-gray-600 text-xs">{t("noLessonsYet")}</p>
+                                  )}
+                                  {sub.lessons
+                                    ?.sort((a: any, b: any) => a.position - b.position)
+                                    .map((lesson: any) => (
+                                      <LessonCard key={lesson.id} lesson={lesson} />
+                                    ))}
+                                </div>
+
+                                {addingLessonToChapter === sub.id ? (
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder={t("lessonTitlePlaceholder")}
+                                      value={chapterLesson.title}
+                                      onChange={(e) => setChapterLesson({ ...chapterLesson, title: e.target.value })}
+                                      className="flex-1 bg-[#0a0f1e] border border-white/10 rounded-xl px-3 py-2 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                                    />
+                                    <button
+                                      onClick={() => addLessonToChapter(sub.id)}
+                                      disabled={loading || !chapterLesson.title}
+                                      className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 px-3 py-2 rounded-xl text-xs font-semibold"
+                                    >{t("add")}</button>
+                                    <button
+                                      onClick={() => setAddingLessonToChapter(null)}
+                                      className="border border-white/20 px-3 py-2 rounded-xl text-xs"
+                                    >{t("cancel")}</button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => { setAddingLessonToChapter(sub.id); setChapterLesson({ title: "", position: (sub.lessons?.length || 0) + 1 }) }}
+                                    className="text-purple-400 hover:text-purple-300 text-xs border border-purple-400/30 hover:border-purple-400 px-3 py-2 rounded-xl transition-colors"
+                                  >{t("addLesson")}</button>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+
                       {/* Add Lesson to Chapter */}
                       {addingLessonToChapter === chapter.id ? (
                         <div className="flex gap-3">
@@ -1124,6 +1208,38 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                           {t("addLesson")}
                         </button>
                       )}
+                      {/* Add Sub-Chapter */}
+{addingSubChapter === chapter.id ? (
+  <div className="flex gap-3 mt-3">
+    <input
+      type="text"
+      placeholder="Sub-chapter title..."
+      value={subChapterTitle}
+      onChange={(e) => setSubChapterTitle(e.target.value)}
+      className="flex-1 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blue-500"
+    />
+    <button
+      onClick={() => addSubChapter(chapter.id)}
+      disabled={loading || !subChapterTitle}
+      className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-semibold"
+    >
+      Add
+    </button>
+    <button
+      onClick={() => setAddingSubChapter(null)}
+      className="border border-white/20 px-4 py-2 rounded-xl text-sm"
+    >
+      Cancel
+    </button>
+  </div>
+) : (
+  <button
+    onClick={() => setAddingSubChapter(chapter.id)}
+    className="text-purple-400 hover:text-purple-300 text-sm border border-purple-400/30 hover:border-purple-400 px-4 py-2 rounded-xl transition-colors mt-2"
+  >
+    ➕ Add Sub-Chapter
+  </button>
+)}
                     </div>
                   ))}
                 </div>
