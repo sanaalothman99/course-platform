@@ -115,6 +115,12 @@ export default function CoursePage() {
     fetchCourse()
     checkEnrollment()
     fetchProgress()
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchCourse()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [courseId])
 
   const fetchCourse = async () => {
