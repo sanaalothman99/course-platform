@@ -520,7 +520,12 @@ export default function ManageCourse() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ thumbnailUrl: data.url }),
       })
-      fetchCourse()
+      // Update local state immediately so preview reflects the new image right away
+      setLessons(prev => prev.map(l => l.id === lessonId ? { ...l, thumbnailUrl: data.url } : l))
+      setChapters(prev => prev.map(ch => ({
+        ...ch,
+        lessons: ch.lessons.map(l => l.id === lessonId ? { ...l, thumbnailUrl: data.url } : l),
+      })))
     }
   } finally {
     setUploadingThumbnail(null)
