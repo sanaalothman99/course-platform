@@ -187,7 +187,13 @@ export default function CoursePage() {
         body: JSON.stringify({ courseId }),
       })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert("فشل الدفع: " + (data.message || JSON.stringify(data)))
+      }
+    } catch (err) {
+      alert("خطأ: " + (err as Error).message)
     } finally {
       setEnrolling(false)
     }
