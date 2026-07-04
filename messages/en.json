@@ -251,7 +251,8 @@
     "noThumbnail": "🖼️ No thumbnail",
     "videoLabel": "📹 Video",
     "pdfLabel": "📄 PDF",
-    "thumbnailBtn": "🖼️ Thumbnail",
+    "thumbnailBtn": "🖼️ Add Thumbnail",
+    "changeThumbnail": "🖼️ Change Thumbnail",
     "additionalFiles": "📎 Additional Files",
     "addFile": "➕ Add File"
   },

@@ -251,7 +251,8 @@
     "noThumbnail": "🖼️ بدون صورة مصغرة",
     "videoLabel": "📹 فيديو",
     "pdfLabel": "📄 PDF",
-    "thumbnailBtn": "🖼️ صورة مصغرة",
+    "thumbnailBtn": "🖼️ إضافة صورة",
+    "changeThumbnail": "🖼️ تغيير الصورة",
     "additionalFiles": "📎 ملفات إضافية",
     "addFile": "➕ إضافة ملف"
   },

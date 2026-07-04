@@ -707,10 +707,16 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
     <input type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPdf(lesson.id, f) }} />
   </label>
   <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-green-500 px-3 py-1 rounded-lg text-xs transition-colors">
-    {uploadingThumbnail === lesson.id ? t("uploading") : t("thumbnailBtn")}
+    {uploadingThumbnail === lesson.id ? t("uploading") : lesson.thumbnailUrl ? t("changeThumbnail") : t("thumbnailBtn")}
     <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadThumbnail(lesson.id, f) }} />
   </label>
 </div>
+
+{lesson.thumbnailUrl && (
+  <div className="mt-2">
+    <img src={lesson.thumbnailUrl} alt="thumbnail" className="h-16 rounded-lg object-cover border border-white/10" />
+  </div>
+)}
     {/* Multiple Files */}
 <div className="mt-3 pt-3 border-t border-white/5">
   <p className="text-xs text-gray-400 mb-2">{t("additionalFiles")}</p>
