@@ -238,7 +238,7 @@ export default function ManageCourse() {
   const [editingChapter, setEditingChapter] = useState<string | null>(null)
   const [newLesson, setNewLesson] = useState({ title: "", position: 1 })
   const [newChapter, setNewChapter] = useState({ title: "", position: 1 })
-  const [editForm, setEditForm] = useState({ title: "", titleAr: "", description: "" })
+  const [editForm, setEditForm] = useState({ title: "", titleAr: "", description: "", position: 1 })
   const [translatingLessonTitle, setTranslatingLessonTitle] = useState(false)
   const [editChapterTitle, setEditChapterTitle] = useState("")
   const [addingLessonToChapter, setAddingLessonToChapter] = useState<string | null>(null)
@@ -691,7 +691,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
           <button
             onClick={() => {
               setEditingLesson(lesson.id)
-              setEditForm({ title: lesson.title, titleAr: lesson.titleAr || "", description: lesson.description || "" })
+              setEditForm({ title: lesson.title, titleAr: lesson.titleAr || "", description: lesson.description || "", position: lesson.position })
             }}
             className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 border border-blue-400/30 rounded-lg"
           >
@@ -708,13 +708,23 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
 
       {editingLesson === lesson.id && (
         <div className="bg-[#111827] rounded-xl p-3 mb-3 flex flex-col gap-2">
-          <input
-            type="text"
-            value={editForm.title}
-            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-            className="w-full bg-[#0a0f1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-            placeholder={t("lessonTitlePlaceholder")}
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={editForm.title}
+              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              className="flex-1 bg-[#0a0f1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+              placeholder={t("lessonTitlePlaceholder")}
+            />
+            <input
+              type="number"
+              value={editForm.position}
+              onChange={(e) => setEditForm({ ...editForm, position: parseInt(e.target.value) || 1 })}
+              className="w-16 bg-[#0a0f1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 text-center"
+              placeholder="#"
+              min={1}
+            />
+          </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">{t("titleArLabel")}</span>
             <button
