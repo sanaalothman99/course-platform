@@ -380,12 +380,6 @@ if (enrolled && course.hasLevels) {
               </div>
             )}
           </div>
-          {course.previewUrl && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-4">{t("previewVideo")}</h2>
-              <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
-            </div>
-          )}
           <h2 className="text-2xl font-bold mb-8">{t("courseLevels")}</h2>
           <SubCourses courseId={course.id} />
         </div>
