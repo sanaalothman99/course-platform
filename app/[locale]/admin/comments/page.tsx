@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar"
 
 type Comment = {
   id: string
+  lessonId: string
   content: string
   createdAt: string
   user: { name: string; email: string }
@@ -114,7 +115,7 @@ export default function AdminComments() {
                   className="flex-1 bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 text-sm"
                 />
                 <button
-                  onClick={() => sendReply(comment.id, comment.lesson?.title)}
+                  onClick={() => sendReply(comment.id, comment.lessonId)}
                   disabled={loading === comment.id || !replyText[comment.id]}
                   className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
                 >
