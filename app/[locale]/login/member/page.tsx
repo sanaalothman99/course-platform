@@ -38,7 +38,7 @@ const handleLogin = async () => {
     } else if (res.status === 403) {
       setError(t("deviceError"))
     } else {
-      setError(t("invalidCreds"))
+      setError(data.message || t("invalidCreds"))
     }
   } catch {
     setError(t("errorGeneric"))
