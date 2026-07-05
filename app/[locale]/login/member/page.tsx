@@ -73,7 +73,10 @@ const handleLogin = async () => {
                 type="email"
                 placeholder="your@email.com"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setForm({ ...form, email: e.target.value.trim() })}
+                autoComplete="email"
+                autoCorrect="off"
+                autoCapitalize="none"
                 className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
@@ -86,6 +89,9 @@ const handleLogin = async () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                autoComplete="current-password"
+                autoCorrect="off"
+                autoCapitalize="none"
                 className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
