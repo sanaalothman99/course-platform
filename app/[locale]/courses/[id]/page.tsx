@@ -591,8 +591,8 @@ if (enrolled && course.hasLevels) {
                               </div>
                             </div>
 
-                            {expandedChapters.has(subChapter.id) && subChapter.lessons
-                              ?.sort((a: any, b: any) => a.position - b.position)
+                            {expandedChapters.has(subChapter.id) && [...(subChapter.lessons || [])]
+                              .sort((a: any, b: any) => a.position - b.position)
                               .map((lesson: any) => (
                                 <div
                                   key={lesson.id}
@@ -611,7 +611,7 @@ if (enrolled && course.hasLevels) {
                           </div>
                         ))
                       ) : (
-                        chapter.lessons
+                        [...chapter.lessons]
                           .sort((a, b) => a.position - b.position)
                           .map((lesson) => (
                             <div
@@ -634,7 +634,7 @@ if (enrolled && course.hasLevels) {
                 </div>
               ))
             ) : (
-              course.lessons.sort((a, b) => a.position - b.position).map((lesson) => (
+              [...course.lessons].sort((a, b) => a.position - b.position).map((lesson) => (
                 <div
                   key={lesson.id}
                   onClick={() => { setActiveLesson(lesson); setActiveTab("lesson"); fetchComments(lesson.id); setSidebarOpen(false) }}

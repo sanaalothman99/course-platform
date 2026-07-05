@@ -1139,7 +1139,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                         {chapter.lessons.length === 0 && !(chapter as any).children?.length && (
                           <p className="text-gray-500 text-sm">{t("noLessonsYet")}</p>
                         )}
-                        {chapter.lessons
+                        {[...chapter.lessons]
                           .sort((a, b) => a.position - b.position)
                           .map((lesson) => (
                             <LessonCard key={lesson.id} lesson={lesson} />
@@ -1149,7 +1149,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                       {/* Sub-Chapters */}
                       {(chapter as any).children?.length > 0 && (
                         <div className="flex flex-col gap-3 mb-4 border-l-2 border-purple-500/30 pl-4 ml-2">
-                          {(chapter as any).children
+                          {[...(chapter as any).children]
                             .sort((a: any, b: any) => a.position - b.position)
                             .map((sub: any) => (
                               <div key={sub.id} className="bg-[#0d1426] border border-purple-500/20 rounded-xl p-4">
@@ -1168,8 +1168,8 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                                   {sub.lessons?.length === 0 && (
                                     <p className="text-gray-600 text-xs">{t("noLessonsYet")}</p>
                                   )}
-                                  {sub.lessons
-                                    ?.sort((a: any, b: any) => a.position - b.position)
+                                  {[...(sub.lessons || [])]
+                                    .sort((a: any, b: any) => a.position - b.position)
                                     .map((lesson: any) => (
                                       <LessonCard key={lesson.id} lesson={lesson} />
                                     ))}
@@ -1279,7 +1279,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
                 <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-6">
                   <h3 className="font-bold mb-4">{t("lessonsWithoutChapter")}</h3>
                   <div className="flex flex-col gap-3">
-                    {lessons.sort((a, b) => a.position - b.position).map((lesson) => (
+                    {[...lessons].sort((a, b) => a.position - b.position).map((lesson) => (
                       <LessonCard key={lesson.id} lesson={lesson} />
                     ))}
                   </div>
