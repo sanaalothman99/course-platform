@@ -436,7 +436,7 @@ if (enrolled && course.hasLevels) {
           </div>
         </section>
 
-        {course.previewUrl && (
+        {course.previewUrl && !course.hasLevels && (
           <section className="max-w-5xl mx-auto px-6 py-8">
             <h2 className="text-2xl font-bold mb-4">{t("previewVideo")}</h2>
             <video src={course.previewUrl} controls controlsList="nodownload" className="w-full rounded-2xl max-h-96" />
