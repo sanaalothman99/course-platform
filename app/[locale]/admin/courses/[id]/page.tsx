@@ -231,6 +231,7 @@ export default function ManageCourse() {
   const [subCourses, setSubCourses] = useState<SubCourse[]>([])
   const [loading, setLoading] = useState(false)
   const [uploadingLesson, setUploadingLesson] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [uploadingPdf, setUploadingPdf] = useState<string | null>(null)
   const [uploadingPreview, setUploadingPreview] = useState(false)
   const [editingLesson, setEditingLesson] = useState<string | null>(null)
@@ -474,29 +475,43 @@ const [subChapterTitle, setSubChapterTitle] = useState("")
 
   const uploadVideo = async (lessonId: string, file: File) => {
     setUploadingLesson(lessonId)
+    setUploadProgress(0)
     try {
       const token = localStorage.getItem("token")
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/video/${courseId}`, {
+
+      // 1. اطلب presigned URL من الباك إند
+      const presignRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/presigned-url/video`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ courseId, filename: file.name, contentType: file.type }),
       })
-      const data = await res.json()
-      if (data.url) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ videoUrl: data.url }),
-        })
-        fetchCourse()
-      }
+      const { presignedUrl, publicUrl } = await presignRes.json()
+
+      // 2. ارفع مباشرة لـ R2 مع progress
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open("PUT", presignedUrl)
+        xhr.setRequestHeader("Content-Type", file.type)
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100))
+        }
+        xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(`R2 error: ${xhr.status}`))
+        xhr.onerror = () => reject(new Error("Network error"))
+        xhr.send(file)
+      })
+
+      // 3. احفظ الـ URL بالداتابيز
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lessonId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ videoUrl: publicUrl }),
+      })
+      fetchCourse()
+    } catch (err) {
+      alert("فشل رفع الفيديو: " + (err as Error).message)
     } finally {
       setUploadingLesson(null)
+      setUploadProgress(0)
     }
   }
 
@@ -738,9 +753,18 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
   {lesson.thumbnailUrl ? <span className="text-green-400 text-xs">{t("hasThumbnail")}</span> : <span className="text-gray-500 text-xs">{t("noThumbnail")}</span>}
 </div>
 
+<div className="flex flex-col gap-2">
+  {uploadingLesson === lesson.id && (
+    <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+      <div
+        className="bg-blue-500 h-1.5 rounded-full transition-all duration-200"
+        style={{ width: `${uploadProgress}%` }}
+      />
+    </div>
+  )}
 <div className="flex gap-2">
-  <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-blue-500 px-3 py-1 rounded-lg text-xs transition-colors">
-    {uploadingLesson === lesson.id ? t("uploading") : t("videoLabel")}
+  <label className={`cursor-pointer bg-[#111827] border border-white/10 hover:border-blue-500 px-3 py-1 rounded-lg text-xs transition-colors ${uploadingLesson === lesson.id ? "opacity-50 pointer-events-none" : ""}`}>
+    {uploadingLesson === lesson.id ? `${uploadProgress}%` : t("videoLabel")}
     <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(lesson.id, f) }} />
   </label>
   <label className="cursor-pointer bg-[#111827] border border-white/10 hover:border-purple-500 px-3 py-1 rounded-lg text-xs transition-colors">
@@ -751,6 +775,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
     {uploadingThumbnail === lesson.id ? t("uploading") : lesson.thumbnailUrl ? t("changeThumbnail") : t("thumbnailBtn")}
     <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadThumbnail(lesson.id, f) }} />
   </label>
+</div>
 </div>
 
 {lesson.thumbnailUrl && (
