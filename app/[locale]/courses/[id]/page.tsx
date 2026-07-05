@@ -553,7 +553,7 @@ if (enrolled && course.hasLevels) {
                     <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶️"}</span>
                     <div className="flex-1">
                       <p className="text-sm font-bold">{chapter.title}</p>
-                      <p className="text-xs text-gray-400">{t("lessonsWord", { count: chapter.lessons.length })}</p>
+                      <p className="text-xs text-gray-400">{t("lessonsWord", { count: chapter.lessons.length + ((chapter as any).children?.reduce((s: number, sub: any) => s + (sub.lessons?.length || 0), 0) || 0) })}</p>
                     </div>
                   </div>
 

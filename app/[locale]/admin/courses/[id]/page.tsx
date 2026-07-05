@@ -556,6 +556,10 @@ const [subChapterTitle, setSubChapterTitle] = useState("")
     setChapters(prev => prev.map(ch => ({
       ...ch,
       lessons: ch.lessons.map(l => l.id === lessonId ? { ...l, thumbnailUrl: uploadData.url } : l),
+      children: (ch as any).children?.map((sub: any) => ({
+        ...sub,
+        lessons: sub.lessons?.map((l: any) => l.id === lessonId ? { ...l, thumbnailUrl: uploadData.url } : l),
+      })),
     })))
   } catch (err) {
     alert("خطأ: " + (err as Error).message)
