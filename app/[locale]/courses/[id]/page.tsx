@@ -112,6 +112,22 @@ export default function CoursePage() {
 
   useEffect(() => {
     if (!courseId) return
+
+    const sessionId = new URLSearchParams(window.location.search).get('session_id')
+    if (sessionId) {
+      const token = localStorage.getItem('token')
+      if (token) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/verify-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ sessionId }),
+        }).then(() => {
+          window.history.replaceState({}, '', window.location.pathname)
+          checkEnrollment()
+        })
+      }
+    }
+
     fetchCourse()
     checkEnrollment()
     fetchProgress()
