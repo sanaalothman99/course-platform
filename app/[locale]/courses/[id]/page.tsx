@@ -445,15 +445,29 @@ if (enrolled && course.hasLevels) {
                       <div className="px-4 md:px-6 py-4 flex items-center gap-3 bg-white/5">
                         <span className="text-blue-400 font-bold text-sm">#{chapter.position}</span>
                         <span className="font-semibold text-sm md:text-base">{chapter.title}</span>
-                        <span className="ml-auto text-gray-400 text-xs">{t("lessonsWord", { count: chapter.lessons.length })}</span>
+                        <span className="ml-auto text-gray-400 text-xs">
+                          {(chapter as any).children?.length > 0
+                            ? `${(chapter as any).children.length} sub-chapters`
+                            : t("lessonsWord", { count: chapter.lessons.length })}
+                        </span>
                       </div>
-                      {chapter.lessons.map((lesson, i) => (
-                        <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
-                          <span className="text-gray-500 text-sm w-6">{i + 1}</span>
-                          <span className="flex-1 text-sm text-gray-300">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
-                          <span className="text-gray-600 text-sm">🔒</span>
-                        </div>
-                      ))}
+                      {(chapter as any).children?.length > 0 ? (
+                        (chapter as any).children.map((sub: any) => (
+                          <div key={sub.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
+                            <span className="text-purple-400 text-xs">▶</span>
+                            <span className="flex-1 text-sm text-purple-300">{sub.title}</span>
+                            <span className="text-gray-500 text-xs">{t("lessonsWord", { count: sub.lessons?.length || 0 })}</span>
+                          </div>
+                        ))
+                      ) : (
+                        chapter.lessons.map((lesson, i) => (
+                          <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
+                            <span className="text-gray-500 text-sm w-6">{i + 1}</span>
+                            <span className="flex-1 text-sm text-gray-300">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
+                            <span className="text-gray-600 text-sm">🔒</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   ))
                 ) : (
@@ -553,7 +567,11 @@ if (enrolled && course.hasLevels) {
                     <span className="text-gray-400 text-xs">{expandedChapters.has(chapter.id) ? "▼" : "▶️"}</span>
                     <div className="flex-1">
                       <p className="text-sm font-bold">{chapter.title}</p>
-                      <p className="text-xs text-gray-400">{t("lessonsWord", { count: chapter.lessons.length + ((chapter as any).children?.reduce((s: number, sub: any) => s + (sub.lessons?.length || 0), 0) || 0) })}</p>
+                      <p className="text-xs text-gray-400">
+                        {(chapter as any).children?.length > 0
+                          ? `${(chapter as any).children.length} sub-chapters`
+                          : t("lessonsWord", { count: chapter.lessons.length })}
+                      </p>
                     </div>
                   </div>
 

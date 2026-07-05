@@ -1111,7 +1111,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
 
                       {/* Chapter Lessons */}
                       <div className="flex flex-col gap-3 mb-4">
-                        {chapter.lessons.length === 0 && (
+                        {chapter.lessons.length === 0 && !(chapter as any).children?.length && (
                           <p className="text-gray-500 text-sm">{t("noLessonsYet")}</p>
                         )}
                         {chapter.lessons
