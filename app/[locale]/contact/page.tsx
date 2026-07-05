@@ -25,6 +25,8 @@ export default function Contact() {
     setLoading(true)
     setError("")
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,15 +36,18 @@ export default function Contact() {
           subject: form.subject,
           message: form.message,
         }),
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
       if (res.ok) {
         setSuccess(true)
         setForm({ firstName: "", lastName: "", email: "", subject: "", message: "" })
       } else {
-        setError(t("errorGeneric"))
+        const data = await res.json()
+        setError(data.message || t("errorGeneric"))
       }
-    } catch {
-      setError(t("errorGeneric"))
+    } catch (err: any) {
+      setError(err.name === "AbortError" ? "انتهت مهلة الاتصال — تحقق من الاتصال بالإنترنت" : t("errorGeneric"))
     } finally {
       setLoading(false)
     }

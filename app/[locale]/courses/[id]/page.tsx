@@ -234,16 +234,20 @@ export default function CoursePage() {
     if (!token || !newComment || !activeLesson) return
     setSubmitting(true)
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments/lesson/${activeLesson.id}`, {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments/lesson/${activeLesson.id}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ content: newComment }),
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
+      if (!res.ok) throw new Error(`Error ${res.status}`)
       setNewComment("")
       fetchComments(activeLesson.id)
+    } catch (err: any) {
+      alert(err.name === "AbortError" ? "انتهت مهلة الاتصال — حاول لاحقاً" : "فشل إرسال التعليق: " + err.message)
     } finally {
       setSubmitting(false)
     }
