@@ -837,6 +837,21 @@ if (enrolled && course.hasLevels) {
                         <span className="text-sm font-semibold">{comment.user?.name}</span>
                       </div>
                       <p className="text-gray-300 text-sm">{comment.content}</p>
+                      {comment.replies?.length > 0 && (
+                        <div className="mt-3 border-l-2 border-blue-500/40 pl-3 flex flex-col gap-2">
+                          {comment.replies.map((reply: any) => (
+                            <div key={reply.id} className="bg-[#0a0f1e] rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-5 h-5 rounded-full bg-green-600 flex items-center justify-center text-xs font-bold">
+                                  {reply.user?.name?.charAt(0).toUpperCase()}
+                                </span>
+                                <span className="text-xs font-semibold text-green-400">{reply.user?.name}</span>
+                              </div>
+                              <p className="text-gray-300 text-xs">{reply.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
