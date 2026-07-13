@@ -87,8 +87,8 @@ export default function Contact() {
             <div className="text-3xl">📞</div>
             <div>
               <p className="text-gray-400 text-sm mb-1">{t("phone")}</p>
-              <a href="tel:+4917661833596" className="text-blue-400 hover:underline font-medium">
-                +49 176 61833596
+              <a href="tel:+4915215997338" className="text-blue-400 hover:underline font-medium">
+                +49 15215997338
               </a>
             </div>
           </div>
