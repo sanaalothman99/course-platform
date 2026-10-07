@@ -25,8 +25,8 @@ type Chapter = {
   title: string
   position: number
   lessons: Lesson[]
+  children?: Chapter[]
 }
-
 type Course = {
   id: string
   title: string
@@ -290,9 +290,10 @@ return () => document.removeEventListener('visibilitychange', handleVisibility)
   }
 const getAllLessons = () => {
   if (!course) return []
-  const chapterLessons = course.chapters?.flatMap(c => c.lessons) || []
-  const standaloneLessons = course.lessons || []
-  return [...chapterLessons, ...standaloneLessons]
+  return course.chapters?.flatMap(c => [
+    ...c.lessons,
+    ...(c.children?.flatMap((sub: any) => sub.lessons) || [])
+  ]) || []
 }
 
   const totalLessons = getAllLessons().length
