@@ -290,10 +290,9 @@ return () => document.removeEventListener('visibilitychange', handleVisibility)
   }
 const getAllLessons = () => {
   if (!course) return []
-  if (course.chapters?.length > 0) {
-    return course.chapters.flatMap(c => c.lessons)
-  }
-  return course.lessons || []
+  const chapterLessons = course.chapters?.flatMap(c => c.lessons) || []
+  const standaloneLessons = course.lessons || []
+  return [...chapterLessons, ...standaloneLessons]
 }
 
   const totalLessons = getAllLessons().length
