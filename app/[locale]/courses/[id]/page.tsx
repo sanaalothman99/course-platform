@@ -132,26 +132,29 @@ export default function CoursePage() {
     checkEnrollment()
     fetchProgress()
 
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') fetchCourse()
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [courseId])
+   const handleVisibility = () => {
+  if (document.visibilityState === 'visible') fetchCourse(false)
+}
+document.addEventListener('visibilitychange', handleVisibility)
+return () => document.removeEventListener('visibilitychange', handleVisibility)
+}, [courseId])
 
-  const fetchCourse = async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`)
-      const data = await res.json()
-      setCourse(data)
-      if (data.chapters) {
-        setExpandedChapters(new Set(data.chapters.map((c: Chapter) => c.id)))
-      }
-    } finally {
-      setLoading(false)
+const fetchCourse = async (showLoading = true) => {
+  try {
+    if (showLoading) setLoading(true)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`)
+    if (!res.ok) return
+    const data = await res.json()
+    setCourse(data)
+    if (data.chapters) {
+      setExpandedChapters(new Set(data.chapters.map((c: Chapter) => c.id)))
     }
+  } catch {
+    // الصفحة تبقى كما هي
+  } finally {
+    if (showLoading) setLoading(false)
   }
-
+}
   const fetchProgress = async () => {
     const token = localStorage.getItem("token")
     if (!token) return
