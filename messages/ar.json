@@ -204,6 +204,7 @@
     "titleArLabel": "العنوان (عربي)",
     "descriptionLabel": "الوصف",
     "descriptionArLabel": "الوصف (عربي)",
+    "priceLabel": "السعر ($)",
     "translateAuto": "🌐 ترجم تلقائياً",
     "translating": "جاري الترجمة...",
     "thumbnailLabel": "صورة الدورة (تظهر في قائمة الدورات)",

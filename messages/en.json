@@ -204,6 +204,7 @@
     "titleArLabel": "Title (Arabic)",
     "descriptionLabel": "Description",
     "descriptionArLabel": "Description (Arabic)",
+    "priceLabel": "Price ($)",
     "translateAuto": "🌐 Auto-translate",
     "translating": "Translating...",
     "thumbnailLabel": "Course Thumbnail (shown in courses list)",

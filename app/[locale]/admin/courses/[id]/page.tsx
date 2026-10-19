@@ -922,6 +922,15 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
       />
     </div>
     <div>
+  <label className="text-sm text-gray-400 mb-2 block">{t("priceLabel")}</label>
+  <input
+    type="number"
+    defaultValue={course?.price}
+    id="edit-price"
+    className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+  />
+</div>
+    <div>
       <label className="text-sm text-gray-400 mb-2 block">{t("thumbnailLabel")}</label>
       {course?.thumbnail && (
         <img src={course.thumbnail} alt="thumbnail" className="w-full h-40 object-contain rounded-xl mb-3 bg-[#0a0f1e]" />
@@ -942,7 +951,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
         const titleAr = (document.getElementById("edit-title-ar") as HTMLInputElement)?.value
         const descriptionAr = (document.getElementById("edit-description-ar") as HTMLTextAreaElement)?.value
         const imageFile = (document.getElementById("edit-image") as HTMLInputElement)?.files?.[0]
-
+        const price = parseFloat((document.getElementById("edit-price") as HTMLInputElement)?.value)
 
         let thumbnail = course?.thumbnail
         let bannerImage = course?.bannerImage
@@ -964,7 +973,7 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ title, description, titleAr, descriptionAr, thumbnail, bannerImage }),
+          body: JSON.stringify({ title, description, titleAr, descriptionAr, thumbnail, bannerImage , price }),
         })
         fetchCourse()
         alert(t("courseUpdated"))
