@@ -107,7 +107,9 @@
     "writeComment": "Write a comment...",
     "send": "Send",
     "markComplete": "Mark as Complete",
-    "completed": "✓ Completed"
+    "completed": "✓ Completed",
+    "limitedOffer": "Limited Offer",
+    "offerEnds": "Offer ends in:"
   },
   "common": {
     "loading": "Loading...",
@@ -255,7 +257,14 @@
     "thumbnailBtn": "🖼️ Add Thumbnail",
     "changeThumbnail": "🖼️ Change Thumbnail",
     "additionalFiles": "📎 Additional Files",
-    "addFile": "➕ Add File"
+    "addFile": "➕ Add File",
+    "discountSection": "Discount / Promo",
+    "discountPrice": "Discount Price ($)",
+    "discountStart": "Start Date",
+    "discountEnd": "End Date",
+    "discountSaved": "Discount saved!",
+    "saveDiscount": "Save Discount"
+
   },
   "dashboard": {
     "welcomeBack": "Welcome back, {name} 👋",

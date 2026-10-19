@@ -107,7 +107,9 @@
     "writeComment": "اكتب تعليقاً...",
     "send": "إرسال",
     "markComplete": "وضع علامة مكتمل",
-    "completed": "✓ مكتمل"
+    "completed": "✓ مكتمل",
+    "limitedOffer": "عرض محدود",
+    "offerEnds": "ينتهي العرض خلال:"
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -255,7 +257,13 @@
     "thumbnailBtn": "🖼️ إضافة صورة",
     "changeThumbnail": "🖼️ تغيير الصورة",
     "additionalFiles": "📎 ملفات إضافية",
-    "addFile": "➕ إضافة ملف"
+    "addFile": "➕ إضافة ملف",
+    "discountSection": "خصم / عرض",
+    "discountPrice": "سعر الخصم ($)",
+    "discountStart": "تاريخ البداية",
+    "discountEnd": "تاريخ الانتهاء",
+    "discountSaved": "تم حفظ الخصم!",
+    "saveDiscount": "حفظ الخصم"
   },
   "dashboard": {
     "welcomeBack": "مرحباً بعودتك، {name} 👋",

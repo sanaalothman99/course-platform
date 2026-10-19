@@ -34,6 +34,9 @@ type Course = {
   titleAr?: string
   descriptionAr?: string
   price: number
+  discountPrice?: number
+  discountStart?: string
+  discountEnd?: string
   level: string
   thumbnail?: string
   previewUrl?: string
@@ -109,6 +112,7 @@ export default function CoursePage() {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(320)
+  const [timeLeft, setTimeLeft] = useState<string>("")
 
   useEffect(() => {
     if (!courseId) return
@@ -127,6 +131,25 @@ export default function CoursePage() {
         })
       }
     }
+    useEffect(() => {
+  if (!course?.discountEnd) return
+  const interval = setInterval(() => {
+    const now = new Date()
+    const end = new Date(course.discountEnd!)
+    const diff = end.getTime() - now.getTime()
+    if (diff <= 0) {
+      setTimeLeft("")
+      clearInterval(interval)
+      return
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+    setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`)
+  }, 1000)
+  return () => clearInterval(interval)
+}, [course])
 
     fetchCourse()
     checkEnrollment()
@@ -416,16 +439,38 @@ if (enrolled && course.hasLevels) {
                 {course.hasLevels ? (
                   <span className="text-gray-400 text-sm">{t("selectLevel")}</span>
                 ) : (
-                  <>
-                    <span className="text-3xl md:text-4xl font-bold">${course.price}</span>
-                    <button
-                      onClick={handleEnroll}
-                      disabled={enrolling}
-                      className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-8 py-3 rounded-full font-semibold transition-colors"
-                    >
-                      {enrolling ? t("processing") : t("enrollNow")}
-                    </button>
-                  </>
+                <>
+  <div className="flex flex-col gap-3">
+    <div className="flex items-center gap-3 flex-wrap">
+      {(() => {
+        const now = new Date()
+        const hasDiscount = course.discountPrice &&
+          course.discountStart && course.discountEnd &&
+          now >= new Date(course.discountStart!) &&
+          now <= new Date(course.discountEnd!)
+        return hasDiscount ? (
+          <>
+            <span className="text-gray-400 line-through text-xl">${course.price}</span>
+            <span className="text-3xl md:text-4xl font-bold text-yellow-400">${course.discountPrice}</span>
+            <span className="text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-2 py-1 rounded-full">🔥 {t("limitedOffer")}</span>
+          </>
+        ) : (
+          <span className="text-3xl md:text-4xl font-bold">${course.price}</span>
+        )
+      })()}
+    </div>
+    {course.discountPrice && timeLeft && (
+      <p className="text-sm text-yellow-400">⏳ {t("offerEnds")} {timeLeft}</p>
+    )}
+    <button
+      onClick={handleEnroll}
+      disabled={enrolling}
+      className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-8 py-3 rounded-full font-semibold transition-colors"
+    >
+      {enrolling ? t("processing") : t("enrollNow")}
+    </button>
+  </div>
+</>
                 )}
               </div>
             </div>

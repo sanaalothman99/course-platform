@@ -930,6 +930,58 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
     className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
   />
 </div>
+{/* Discount Section */}
+<div className="border border-yellow-500/30 rounded-2xl p-4 bg-yellow-500/5">
+  <h3 className="text-yellow-400 font-semibold mb-4">🏷️ {t("discountSection")}</h3>
+  <div className="flex flex-col gap-3">
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">{t("discountPrice")}</label>
+      <input
+        type="number"
+        defaultValue={course?.discountPrice || ""}
+        id="edit-discount-price"
+        placeholder="e.g. 49"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
+      />
+    </div>
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">{t("discountStart")}</label>
+      <input
+        type="datetime-local"
+        defaultValue={course?.discountStart ? new Date(course.discountStart).toISOString().slice(0, 16) : ""}
+        id="edit-discount-start"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
+      />
+    </div>
+    <div>
+      <label className="text-sm text-gray-400 mb-2 block">{t("discountEnd")}</label>
+      <input
+        type="datetime-local"
+        defaultValue={course?.discountEnd ? new Date(course.discountEnd).toISOString().slice(0, 16) : ""}
+        id="edit-discount-end"
+        className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
+      />
+    </div>
+    <button
+      onClick={async () => {
+        const token = localStorage.getItem("token")
+        const discountPrice = parseFloat((document.getElementById("edit-discount-price") as HTMLInputElement)?.value)
+        const discountStart = (document.getElementById("edit-discount-start") as HTMLInputElement)?.value
+        const discountEnd = (document.getElementById("edit-discount-end") as HTMLInputElement)?.value
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ discountPrice, discountStart, discountEnd }),
+        })
+        fetchCourse()
+        alert(t("discountSaved"))
+      }}
+      className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-xl font-semibold transition-colors"
+    >
+      🏷️ {t("saveDiscount")}
+    </button>
+  </div>
+</div>
     <div>
       <label className="text-sm text-gray-400 mb-2 block">{t("thumbnailLabel")}</label>
       {course?.thumbnail && (
