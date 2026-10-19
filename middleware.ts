@@ -1,7 +1,31 @@
 import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default createMiddleware(routing)
+const intlMiddleware = createMiddleware(routing)
+
+export default async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname
+  const isMaintenancePage = pathname.includes('/maintenance')
+  const isAdminPage = pathname.includes('/admin')
+
+  if (!isMaintenancePage && !isAdminPage) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+        cache: 'no-store',
+      })
+      const data = await res.json()
+      if (data?.maintenanceMode === true) {
+        const locale = pathname.startsWith('/ar') ? 'ar' : 'en'
+        return NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
+      }
+    } catch {
+      // إذا فشل الطلب — أكمل بشكل طبيعي
+    }
+  }
+
+  return intlMiddleware(req)
+}
 
 export const config = {
   matcher: ['/((?!api|_next|_vercel|.\\..).*)'],
