@@ -112,7 +112,7 @@ export default function CoursePage() {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(320)
-  const [timeLeft, setTimeLeft] = useState<string>("")
+
 
   useEffect(() => {
     if (!courseId) return
@@ -131,28 +131,7 @@ export default function CoursePage() {
         })
       }
     }
-useEffect(() => {
-  if (!course?.discountEnd) {
-    setTimeLeft("")
-    return
-  }
-  const interval = setInterval(() => {
-    const now = new Date()
-    const end = new Date(course.discountEnd!)
-    const diff = end.getTime() - now.getTime()
-    if (diff <= 0) {
-      setTimeLeft("")
-      clearInterval(interval)
-      return
-    }
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-    setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`)
-  }, 1000)
-  return () => clearInterval(interval)
-}, [course])
+
 
     fetchCourse()
     checkEnrollment()
@@ -462,9 +441,7 @@ if (enrolled && course.hasLevels) {
         )
       })()}
     </div>
-    {course.discountPrice && timeLeft && (
-      <p className="text-sm text-yellow-400">⏳ {t("offerEnds")} {timeLeft}</p>
-    )}
+   
     <button
       onClick={handleEnroll}
       disabled={enrolling}
