@@ -11,9 +11,10 @@ export default async function middleware(req: NextRequest) {
 
   if (!isMaintenancePage && !isAdminPage) {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
-        cache: 'no-store',
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/settings?t=${Date.now()}`,
+        { cache: 'no-store' }
+      )
       const data = await res.json()
       if (data?.maintenanceMode === true) {
         const locale = pathname.startsWith('/ar') ? 'ar' : 'en'
