@@ -17,14 +17,17 @@ export default async function middleware(req: NextRequest) {
       const data = await res.json()
       if (data?.maintenanceMode === true) {
         const locale = pathname.startsWith('/ar') ? 'ar' : 'en'
-        return NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
+        const response = NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
+        response.headers.set('Cache-Control', 'no-store, no-cache')
+        return response
       }
     } catch {
-      // إذا فشل الطلب — أكمل بشكل طبيعي
     }
   }
 
-  return intlMiddleware(req)
+  const response = intlMiddleware(req)
+  response.headers.set('Cache-Control', 'no-store, no-cache')
+  return response
 }
 
 export const config = {
