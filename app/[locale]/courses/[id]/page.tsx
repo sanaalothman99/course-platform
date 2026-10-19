@@ -131,8 +131,11 @@ export default function CoursePage() {
         })
       }
     }
-    useEffect(() => {
-  if (!course?.discountEnd) return
+useEffect(() => {
+  if (!course?.discountEnd) {
+    setTimeLeft("")
+    return
+  }
   const interval = setInterval(() => {
     const now = new Date()
     const end = new Date(course.discountEnd!)
