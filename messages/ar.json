@@ -158,7 +158,13 @@
     "totalOrdersCount": "{count} إجمالي الطلبات",
     "colStudent": "الطالب",
     "colDate": "التاريخ",
-    "noOrders": "لا توجد طلبات حالياً"
+    "noOrders": "لا توجد طلبات حالياً",
+    "maintenanceTitle": "وضع الصيانة",
+    "maintenanceDesc": "عند التفعيل، سيرى الطلاب صفحة صيانة بدل الموقع.",
+    "maintenanceOn": "وضع الصيانة مفعّل",
+    "maintenanceOff": "الموقع يعمل بشكل طبيعي",
+    "enableMaintenance": "تفعيل وضع الصيانة",
+    "disableMaintenance": "إيقاف وضع الصيانة"
   },
   "newCourse": {
     "title": "➕ إضافة دورة جديدة",

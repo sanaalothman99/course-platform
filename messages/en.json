@@ -158,7 +158,13 @@
     "totalOrdersCount": "{count} total orders",
     "colStudent": "Student",
     "colDate": "Date",
-    "noOrders": "No orders yet"
+    "noOrders": "No orders yet",
+    "maintenanceTitle": "Maintenance Mode",
+    "maintenanceDesc": "When enabled, students will see a maintenance page instead of the website.",
+    "maintenanceOn": "Maintenance Mode is ON",
+    "maintenanceOff": "Website is Live",
+    "enableMaintenance": "Enable Maintenance",
+    "disableMaintenance": "Disable Maintenance"
   },
   "newCourse": {
     "title": "➕ Add New Course",

@@ -75,7 +75,52 @@ function ResetDevice() {
     </div>
   )
 }
+function MaintenanceToggle() {
+  const [maintenance, setMaintenance] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const t = useTranslations("admin")
 
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`)
+      .then(res => res.json())
+      .then(data => setMaintenance(data?.maintenanceMode || false))
+  }, [])
+
+  const toggle = async () => {
+    setLoading(true)
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/maintenance`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ maintenanceMode: !maintenance }),
+    })
+    setMaintenance(!maintenance)
+    setLoading(false)
+  }
+
+  return (
+    <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-12">
+      <h2 className="text-xl font-bold mb-2">🔧 {t("maintenanceTitle")}</h2>
+      <p className="text-gray-400 text-sm mb-4">{t("maintenanceDesc")}</p>
+      <div className="flex items-center justify-between">
+        <span className={`text-sm font-semibold ${maintenance ? "text-red-400" : "text-green-400"}`}>
+          {maintenance ? "🔴 " + t("maintenanceOn") : "🟢 " + t("maintenanceOff")}
+        </span>
+        <button
+          onClick={toggle}
+          disabled={loading}
+          className={`px-6 py-2 rounded-xl font-semibold text-sm transition-colors ${
+            maintenance
+              ? "bg-green-600 hover:bg-green-500"
+              : "bg-red-600 hover:bg-red-500"
+          }`}
+        >
+          {loading ? "..." : maintenance ? t("disableMaintenance") : t("enableMaintenance")}
+        </button>
+      </div>
+    </div>
+  )
+}
 export default function Admin() {
   const router = useRouter()
   const [courses, setCourses] = useState<any[]>([])
@@ -189,6 +234,8 @@ export default function Admin() {
           </Link>
         </div>
         <ResetDevice />
+        {/* Maintenance Mode */}
+        <MaintenanceToggle />
 
     {/* Courses - Mobile Friendly */}
 <h2 className="text-2xl font-bold mb-6">{t("coursesTable")}</h2>
