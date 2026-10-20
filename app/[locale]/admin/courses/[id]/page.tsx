@@ -762,7 +762,24 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
   {lesson.pdfUrl ? <span className="text-green-400 text-xs">{t("hasPdf")}</span> : <span className="text-gray-500 text-xs">{t("noPdf")}</span>}
   {lesson.thumbnailUrl ? <span className="text-green-400 text-xs">{t("hasThumbnail")}</span> : <span className="text-gray-500 text-xs">{t("noThumbnail")}</span>}
 </div>
-
+<button
+  onClick={async () => {
+    const token = localStorage.getItem("token")
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/lessons/${lesson.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ isFree: !(lesson as any).isFree }),
+    })
+    fetchCourse()
+  }}
+  className={`text-xs px-3 py-1 rounded-lg border transition-colors mb-2 ${
+    (lesson as any).isFree
+      ? "bg-green-500/20 text-green-400 border-green-400/30"
+      : "bg-gray-500/10 text-gray-400 border-white/10"
+  }`}
+>
+  {(lesson as any).isFree ? "🆓 Free Lesson" : "🔒 Set as Free"}
+</button>
 <div className="flex flex-col gap-2">
   {uploadingLesson === lesson.id && (
     <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">

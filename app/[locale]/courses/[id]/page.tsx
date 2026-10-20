@@ -18,6 +18,7 @@ type Lesson = {
   thumbnailUrl?:string
   chapterId?: string
   files?: any[]
+  isFree?: boolean
 }
 
 type Chapter = {
@@ -529,17 +530,26 @@ if (enrolled && course.hasLevels) {
                             <span className="text-gray-500 text-xs">{t("lessonsWord", { count: sub.lessons?.length || 0 })}</span>
                           </div>
                         ))
-                      ) : (
-                        chapter.lessons.map((lesson, i) => (
-                          <div key={lesson.id} className="px-4 md:px-6 py-3 flex items-center gap-4 border-t border-white/5">
-                            <span className="text-gray-500 text-sm w-6">{i + 1}</span>
-                            <span className="flex-1 text-sm text-gray-300">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
-                            <span className="text-gray-600 text-sm">🔒</span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  ))
+                      ) :(
+  chapter.lessons.map((lesson, i) => (
+    <div key={lesson.id} className="px-4 md:px-6 py-3 flex flex-col gap-2 border-t border-white/5">
+      <div className="flex items-center gap-4">
+        <span className="text-gray-500 text-sm w-6">{i + 1}</span>
+        <span className="flex-1 text-sm text-gray-300">{locale === "ar" && lesson.titleAr ? lesson.titleAr : lesson.title}</span>
+        {lesson.isFree ? (
+          <span className="text-xs text-green-400 bg-green-400/10 border border-green-400/30 px-2 py-1 rounded-full">🆓 {t("freeLesson")}</span>
+        ) : (
+          <span className="text-gray-600 text-sm">🔒</span>
+        )}
+      </div>
+      {lesson.isFree && lesson.videoUrl && (
+        <video src={lesson.videoUrl} controls controlsList="nodownload" className="w-full rounded-xl max-h-64 mt-1" />
+      )}
+    </div>
+  ))
+)}
+                </div>
+              ))
                 ) : (
                   course.lessons.map((lesson, i) => (
                     <div key={lesson.id} className="bg-[#111827] border border-white/10 rounded-xl px-4 md:px-6 py-4 flex items-center gap-4">

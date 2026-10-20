@@ -109,7 +109,8 @@
     "markComplete": "Mark as Complete",
     "completed": "✓ Completed",
     "limitedOffer": "Limited Offer",
-    "offerEnds": "Offer ends in:"
+    "offerEnds": "Offer ends in:",
+    "freeLesson": "Free"
   },
   "common": {
     "loading": "Loading...",
