@@ -980,19 +980,28 @@ const deleteLessonFile = async (fileId: string, lessonId: string) => {
       />
     </div>
     <button
-      onClick={async () => {
-        const token = localStorage.getItem("token")
-        const discountPrice = parseFloat((document.getElementById("edit-discount-price") as HTMLInputElement)?.value)
-        const discountStart = (document.getElementById("edit-discount-start") as HTMLInputElement)?.value
-        const discountEnd = (document.getElementById("edit-discount-end") as HTMLInputElement)?.value
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ discountPrice, discountStart, discountEnd }),
-        })
-        fetchCourse()
-        alert(t("discountSaved"))
-      }}
+    onClick={async () => {
+  const token = localStorage.getItem("token")
+  const priceVal = (document.getElementById("edit-discount-price") as HTMLInputElement)?.value
+  const startVal = (document.getElementById("edit-discount-start") as HTMLInputElement)?.value
+  const endVal = (document.getElementById("edit-discount-end") as HTMLInputElement)?.value
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      discountPrice: priceVal ? parseFloat(priceVal) : null,
+      discountStart: startVal ? new Date(startVal).toISOString() : null,
+      discountEnd: endVal ? new Date(endVal).toISOString() : null,
+    }),
+  })
+  if (!res.ok) {
+    alert("Error " + res.status)
+    return
+  }
+  fetchCourse()
+  alert(t("discountSaved"))
+}}
       className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-xl font-semibold transition-colors"
     >
       🏷️ {t("saveDiscount")}
