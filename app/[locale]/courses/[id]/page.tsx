@@ -543,7 +543,14 @@ if (enrolled && course.hasLevels) {
         )}
       </div>
       {lesson.isFree && lesson.videoUrl && (
-        <video src={lesson.videoUrl} controls controlsList="nodownload" className="w-full rounded-xl max-h-64 mt-1" />
+<video
+    src={lesson.videoUrl}
+    poster={lesson.thumbnailUrl}
+    preload="metadata"
+    controls
+    controlsList="nodownload"
+    className="w-full rounded-xl max-h-64 mt-1 bg-black"
+  />
       )}
     </div>
   ))
