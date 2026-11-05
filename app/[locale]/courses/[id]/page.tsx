@@ -82,7 +82,15 @@ function SubCourses({ courseId }: { courseId: string }) {
             <h3 className="font-bold text-lg mt-3 mb-2">{locale === "ar" && sub.titleAr ? sub.titleAr : sub.title}</h3>
             <p className="text-gray-400 text-sm mb-4">{locale === "ar" && sub.descriptionAr ? sub.descriptionAr : sub.description}</p>
             <div className="flex justify-between items-center">
-              <span className="text-xl font-bold">${sub.price}</span>
+              {sub.discountPrice && sub.discountStart && sub.discountEnd &&
+ new Date() >= new Date(sub.discountStart) && new Date() <= new Date(sub.discountEnd) ? (
+  <div className="flex items-center gap-2">
+    <span className="text-gray-400 line-through text-sm">${sub.price}</span>
+    <span className="text-xl font-bold text-yellow-400">${sub.discountPrice}</span>
+  </div>
+) : (
+  <span className="text-xl font-bold">${sub.price}</span>
+)}
               <span className="text-blue-400 text-sm">{t("viewLevel")}</span>
             </div>
           </div>
